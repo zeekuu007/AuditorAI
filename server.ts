@@ -22,9 +22,21 @@ async function startServer() {
       const targetUrl = url.startsWith("http") ? url : `https://${url}`;
       const response = await axios.get(targetUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Cache-Control": "max-age=0",
+          "Sec-Ch-Ua": '"Not A(Bit:Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+          "Sec-Ch-Ua-Mobile": "?0",
+          "Sec-Ch-Ua-Platform": '"Windows"',
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "Upgrade-Insecure-Requests": "1"
         },
-        timeout: 10000,
+        timeout: 15000,
       });
 
       const $ = cheerio.load(response.data);
@@ -83,7 +95,15 @@ async function startServer() {
       });
     } catch (error: any) {
       console.error("Scraping error:", error.message);
-      res.status(500).json({ error: `Failed to scrape website: ${error.message}` });
+      
+      let clientMessage = error.message;
+      if (error.response?.status === 403) {
+        clientMessage = "Access denied (403). This website may be blocking automated scrapers. Try a different URL or ensure the site is public.";
+      } else if (error.code === 'ECONNABORTED') {
+        clientMessage = "Request timed out. The website is taking too long to respond.";
+      }
+      
+      res.status(500).json({ error: `Failed to scrape website: ${clientMessage}` });
     }
   });
 

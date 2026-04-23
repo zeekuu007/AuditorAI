@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { 
   Globe, 
   Search, 
@@ -14,7 +16,9 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingDown,
-  Loader2
+  Loader2,
+  Download,
+  FileText
 } from "lucide-react";
 import { generateAudit, generateColdEmail, AuditResult, EmailResult } from "./ai";
 
@@ -74,6 +78,213 @@ export default function App() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const downloadPDF = () => {
+    if (!results) return;
+    const { audit, scrapedData } = results;
+    const doc = new jsPDF();
+    const lime: [number, number, number] = [190, 242, 100]; // #BEF264
+    const dark: [number, number, number] = [10, 10, 10]; // #0a0a0a
+
+    // Background
+    doc.setFillColor(dark[0], dark[1], dark[2]);
+    doc.rect(0, 0, 210, 297, 'F');
+
+    // Header & Logo (Wordmark Recreation - Reduced Size)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    
+    // "DIGITAL" in White
+    doc.setTextColor(255, 255, 255);
+    doc.text("DIGITAL", 20, 25);
+    
+    // "MATTER." in Lime
+    const digitalWidth = doc.getTextWidth("DIGITAL ");
+    doc.setTextColor(lime[0], lime[1], lime[2]);
+    doc.text("MATTER.", 20 + digitalWidth, 25);
+    
+    // "DIGITALLY YOURS" Subtext - Aligned Left
+    doc.setFont("courier", "bold");
+    doc.setFontSize(6);
+    doc.setTextColor(150, 150, 150);
+    doc.text("D I G I T A L L Y   Y O U R S", 20, 29);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.setTextColor(lime[0], lime[1], lime[2]);
+    doc.text("CRO AUDIT REPORT", 20, 50);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Prepared for: ${new URL(scrapedData.url).hostname.toUpperCase()}`, 20, 60);
+    doc.text(`DATE Created: ${new Date().toLocaleDateString()}`, 20, 65);
+
+    // Score Metrics
+    let currentY = 85;
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.text("PERFORMANCE METRICS", 20, currentY);
+    
+    currentY += 15;
+    const scores = [
+      { label: "Messaging & Clarity", score: audit.categoryScores.messaging },
+      { label: "Trust & Social Proof", score: audit.categoryScores.trust },
+      { label: "Performance", score: audit.categoryScores.performance },
+      { label: "User Experience", score: audit.categoryScores.ux },
+      { label: "Conversion Optimization", score: audit.categoryScores.cta }
+    ];
+
+    scores.forEach((s) => {
+      doc.setFontSize(10);
+      doc.setTextColor(180, 180, 180);
+      doc.text(s.label, 20, currentY);
+      
+      doc.setFillColor(30, 30, 30);
+      doc.rect(120, currentY - 4, 60, 4, 'F');
+      doc.setFillColor(lime[0], lime[1], lime[2]);
+      doc.rect(120, currentY - 4, (s.score / 10) * 60, 4, 'F');
+      
+      doc.setTextColor(lime[0], lime[1], lime[2]);
+      doc.text(`${s.score}/10`, 185, currentY);
+      currentY += 10;
+    });
+
+    // Executive Analysis
+    currentY += 15;
+    doc.setFontSize(14);
+    doc.setTextColor(lime[0], lime[1], lime[2]);
+    doc.text("EXECUTIVE ANALYSIS", 20, currentY);
+    
+    currentY += 10;
+    doc.setFontSize(10);
+    doc.setTextColor(220, 220, 220);
+    const summaryLines = doc.splitTextToSize(audit.executiveSummary, 170);
+    summaryLines.forEach((line: string, index: number) => {
+      if (currentY > 275) {
+        doc.addPage();
+        doc.setFillColor(dark[0], dark[1], dark[2]);
+        doc.rect(0, 0, 210, 297, 'F');
+        currentY = 30;
+      }
+      const isLastLine = index === summaryLines.length - 1;
+      doc.text(line, 20, currentY, isLastLine ? {} : { align: 'justify', maxWidth: 170 });
+      currentY += 6;
+    });
+
+    // Prioritized Issues Table
+    currentY += 10;
+    if (currentY > 200) {
+      doc.addPage();
+      doc.setFillColor(dark[0], dark[1], dark[2]);
+      doc.rect(0, 0, 210, 297, 'F');
+      currentY = 30;
+    }
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [['OPPORTUNITY FOR GROWTH', 'EXPECTED IMPACT']],
+      body: audit.prioritizedIssues.map(i => [i.issue, i.impact]),
+      theme: 'plain',
+      headStyles: { fillColor: lime, textColor: dark, fontStyle: 'bold' },
+      bodyStyles: { textColor: [255, 255, 255], fillColor: [15, 15, 15] },
+      alternateRowStyles: { fillColor: [25, 25, 25] },
+      margin: { left: 20, right: 20 },
+      didDrawPage: (data) => {
+        currentY = data.cursor?.y || 20;
+      }
+    });
+
+    currentY += 20;
+    if (currentY > 250) {
+      doc.addPage();
+      doc.setFillColor(dark[0], dark[1], dark[2]);
+      doc.rect(0, 0, 210, 297, 'F');
+      currentY = 30;
+    }
+
+    // Quick Wins Section
+    doc.setFontSize(14);
+    doc.setTextColor(lime[0], lime[1], lime[2]);
+    doc.text("QUICK WINS", 20, currentY);
+    currentY += 10;
+    
+    audit.quickWins.forEach((win) => {
+      const bullet = "• ";
+      const lines = doc.splitTextToSize(win, 164); // Reduced width to account for bullet
+      
+      lines.forEach((line: string, index: number) => {
+        if (currentY > 275) {
+          doc.addPage();
+          doc.setFillColor(dark[0], dark[1], dark[2]);
+          doc.rect(0, 0, 210, 297, 'F');
+          currentY = 30;
+        }
+        
+        doc.setFontSize(10);
+        doc.setTextColor(190, 190, 190);
+        
+        if (index === 0) {
+          doc.setTextColor(lime[0], lime[1], lime[2]);
+          doc.text(bullet, 20, currentY);
+          doc.setTextColor(190, 190, 190);
+        }
+        
+        const isLastLine = index === lines.length - 1;
+        doc.text(line, 26, currentY, isLastLine ? {} : { align: 'justify', maxWidth: 164 });
+        currentY += 6;
+      });
+      currentY += 2;
+    });
+
+    currentY += 10;
+    if (currentY > 250) {
+      doc.addPage();
+      doc.setFillColor(dark[0], dark[1], dark[2]);
+      doc.rect(0, 0, 210, 297, 'F');
+      currentY = 30;
+    }
+
+    // Strategic Recommendations
+    doc.setFontSize(14);
+    doc.setTextColor(lime[0], lime[1], lime[2]);
+    doc.text("STRATEGIC RECOMMENDATIONS", 20, currentY);
+    currentY += 10;
+    
+    audit.strategicImprovements.forEach((imp) => {
+      const bullet = "• ";
+      const lines = doc.splitTextToSize(imp, 164);
+      
+      lines.forEach((line: string, index: number) => {
+        if (currentY > 275) {
+          doc.addPage();
+          doc.setFillColor(dark[0], dark[1], dark[2]);
+          doc.rect(0, 0, 210, 297, 'F');
+          currentY = 30;
+        }
+
+        doc.setFontSize(10);
+        doc.setTextColor(190, 190, 190);
+
+        if (index === 0) {
+          doc.setTextColor(lime[0], lime[1], lime[2]);
+          doc.text(bullet, 20, currentY);
+          doc.setTextColor(190, 190, 190);
+        }
+
+        const isLastLine = index === lines.length - 1;
+        doc.text(line, 26, currentY, isLastLine ? {} : { align: 'justify', maxWidth: 164 });
+        currentY += 6;
+      });
+      currentY += 2;
+    });
+
+    // Branding Footer on last page
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text("THE DIGITAL MATTER | GROWTH SYSTEMS & PERFORMANCE LAB", 105, 288, { align: 'center' });
+
+    doc.save(`Audit-Report-${new URL(scrapedData.url).hostname}.pdf`);
   };
 
   return (
@@ -204,6 +415,25 @@ export default function App() {
                     </div>
                     <h2 className="text-xl font-bold">CRO Audit Insights</h2>
                   </div>
+
+                  {/* Category Scores Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                    {[
+                      { label: "Messaging", score: results.audit.categoryScores.messaging },
+                      { label: "Trust", score: results.audit.categoryScores.trust },
+                      { label: "Speed", score: results.audit.categoryScores.performance },
+                      { label: "UX", score: results.audit.categoryScores.ux },
+                      { label: "CTA", score: results.audit.categoryScores.cta },
+                    ].map((s, i) => (
+                      <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-3 text-center">
+                        <div className="text-[9px] uppercase tracking-widest text-slate-500 mb-1">{s.label}</div>
+                        <div className={`text-lg font-bold ${s.score > 7 ? 'text-emerald-400' : s.score > 4 ? 'text-amber-400' : 'text-red-400'}`}>
+                          {s.score}/10
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/5 mb-6">
                     <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 block mb-3 text-left">Executive Summary</span>
                     <p className="text-slate-300 leading-relaxed text-base font-light italic text-left">
@@ -284,9 +514,24 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Middle Action Bar: Centered Download Button */}
+              <div className="lg:col-span-12 flex justify-center py-6">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={downloadPDF}
+                  className="flex items-center gap-4 bg-[#BEF264] text-black px-12 py-5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl shadow-[#BEF264]/20 group transition-all"
+                >
+                  <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center group-hover:bg-black/20">
+                    <Download className="w-4 h-4" />
+                  </div>
+                  Get Branded AUDIT Report (PDF)
+                </motion.button>
+              </div>
+
               {/* Right Column: Cold Email */}
-              <div className="lg:col-span-5 flex flex-col gap-6">
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-white backdrop-blur-md flex flex-col flex-1 group text-left">
+              <div className="lg:col-span-12 xl:col-span-8 xl:mx-auto w-full flex flex-col gap-6">
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-white backdrop-blur-md flex flex-col flex-1 group text-left relative overflow-hidden">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-500/20">

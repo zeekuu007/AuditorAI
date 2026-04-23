@@ -10,6 +10,13 @@ export interface AuditResult {
   strategicImprovements: string[];
   conversionRiskScore: number;
   riskJustification: string;
+  categoryScores: {
+    messaging: number;
+    trust: number;
+    performance: number;
+    ux: number;
+    cta: number;
+  };
 }
 
 export interface EmailResult {
@@ -36,6 +43,8 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
     2. No hallucinations.
     3. Analyze only what is visible in the provided data.
     4. Tie every insight to revenue/conversion impact.
+    5. IMPORTANT: For every issue, recommendation, or opportunity, use the framework: "That's the issue and we can fix it by doing this". 
+    6. Content must be highly prescriptive and authoritative.
   `;
 
   const response = await ai.models.generateContent({
@@ -43,7 +52,7 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are a world-class CRO (Conversion Rate Optimization) expert with 15 years of experience in direct-response marketing and user psychology. Your goal is to find friction points and conversion killers on a website.",
+      systemInstruction: "You are a world-class CRO (Conversion Rate Optimization) expert and agency founder at Digital Matter. You have a direct, punchy, and highly prescriptive communication style. You don't just point out problems; you provide the exact architectural fix. Your tone is 'Problem -> Solution'. Example: 'Your hero headline is too vague, and we can fix it by using a customer-centric promise results-driven headline.'",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -63,9 +72,20 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
           quickWins: { type: Type.ARRAY, items: { type: Type.STRING } },
           strategicImprovements: { type: Type.ARRAY, items: { type: Type.STRING } },
           conversionRiskScore: { type: Type.NUMBER, description: "0-10 scale where 10 is high risk of losing customers" },
-          riskJustification: { type: Type.STRING }
+          riskJustification: { type: Type.STRING },
+          categoryScores: {
+            type: Type.OBJECT,
+            properties: {
+              messaging: { type: Type.NUMBER, description: "0-10 score for messaging clarity" },
+              trust: { type: Type.NUMBER, description: "0-10 score for trust indicators" },
+              performance: { type: Type.NUMBER, description: "0-10 score for perceived performance" },
+              ux: { type: Type.NUMBER, description: "0-10 score for user experience" },
+              cta: { type: Type.NUMBER, description: "0-10 score for CTA effectiveness" }
+            },
+            required: ["messaging", "trust", "performance", "ux", "cta"]
+          }
         },
-        required: ["executiveSummary", "prioritizedIssues", "missingOpportunities", "quickWins", "strategicImprovements", "conversionRiskScore", "riskJustification"]
+        required: ["executiveSummary", "prioritizedIssues", "missingOpportunities", "quickWins", "strategicImprovements", "conversionRiskScore", "riskJustification", "categoryScores"]
       }
     }
   });
@@ -103,7 +123,7 @@ export async function generateColdEmail(auditResult: AuditResult, scrapedData: a
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are a master of cold outreach and sales copywriting. You write emails that people actually want to read because they offer genuine value and show deep research. Your tone is like a helpful consultant, not a salesperson.",
+      systemInstruction: "You are the founder of Digital Matter, a high-end CRO agency. You write emails that are direct, value-heavy, and shows you've actually spent time looking at their architecture. Your tone is like a high-level partner, not a vendor. You focus on 'Conversion Gaps' and 'Fixes'.",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
