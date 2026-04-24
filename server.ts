@@ -54,6 +54,7 @@ async function startServer() {
         .filter((_, el) => {
           const text = $(el).text().toLowerCase();
           const cls = $(el).attr("class") || "";
+          const id = $(el).attr("id") || "";
           return (
             text.includes("get started") ||
             text.includes("sign up") ||
@@ -62,17 +63,41 @@ async function startServer() {
             text.includes("try") ||
             text.includes("buy") ||
             text.includes("contact") ||
+            text.includes("checkout") ||
+            text.includes("add to cart") ||
             cls.includes("btn") ||
-            cls.includes("button")
+            cls.includes("button") ||
+            id.includes("btn") ||
+            id.includes("button")
           );
         })
-        .map((_, el) => $(el).text().trim())
+        .map((_, el) => ({
+          text: $(el).text().trim(),
+          type: el.tagName,
+          href: $(el).attr("href") || ""
+        }))
         .get()
-        .slice(0, 10);
+        .slice(0, 15);
+
+      // Extract Social Proof Indicators
+      const socialProof = {
+        hasTestimonials: $("body").text().toLowerCase().includes("testimonial") || $(".testimonial, .review, .feedback").length > 0,
+        hasTrustBadges: $('img[src*="trust"], img[src*="badge"], img[src*="guarantee"], img[src*="verified"]').length > 0,
+        reviewCount: $(".rating, .stars, .reviews").length,
+      };
+
+      // Extract Form Info
+      const forms = $("form").map((_, el) => {
+        const inputs = $(el).find("input, select, textarea").length;
+        return { inputCount: inputs };
+      }).get();
+
+      // Extract Navigation Info
+      const navLinks = $("nav a").length;
 
       // Extract body text (main readable content)
       // We focus on semantic tags first
-      let bodyText = $("main, article, #content").text().trim();
+      let bodyText = $("main, article, #content, .content, .main").text().trim();
       if (!bodyText || bodyText.length < 200) {
         bodyText = $("body").text().trim();
       }
@@ -82,7 +107,7 @@ async function startServer() {
         .replace(/\s+/g, " ")
         .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
         .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
-        .substring(0, 5000); // Limit context for AI
+        .substring(0, 6000); // Slightly more context
 
       res.json({
         url: targetUrl,
@@ -91,6 +116,9 @@ async function startServer() {
         h1s,
         h2s,
         ctas,
+        socialProof,
+        forms,
+        navLinks,
         bodyText,
       });
     } catch (error: any) {
