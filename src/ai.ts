@@ -3,20 +3,25 @@ import { GoogleGenAI, Type } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface AuditResult {
-  executiveSummary: string;
-  prioritizedIssues: { issue: string; impact: string }[];
-  missingOpportunities: string[];
-  quickWins: string[];
-  strategicImprovements: string[];
-  conversionRiskScore: number;
-  riskJustification: string;
-  categoryScores: {
+  executiveSummary: string[];
+  performanceMetrics: {
     messaging: number;
     trust: number;
     performance: number;
     ux: number;
-    cta: number;
+    conversion: number;
   };
+  performanceDiagnosis: string[];
+  customerJourney: string[];
+  revenueOpportunityMap: string[];
+  systemicLimitations: string[];
+  priorityFramework: {
+    immediate: string;
+    growth: string;
+    longTerm: string;
+  };
+  strategicInsight: string;
+  strategyAlignmentText: string;
 }
 
 export interface EmailResult {
@@ -26,32 +31,33 @@ export interface EmailResult {
 
 export async function generateAudit(scrapedData: any): Promise<AuditResult> {
   const prompt = `
-    Perform a comprehensive "Strategic Growth & Architecture Audit" for the following website. Move beyond just surface-level CRO—analyze the entire ecosystem including branding, trust infrastructure, user experience, and revenue gaps.
-    
+    Analyze this website URL: ${scrapedData.url} and generate a STRATEGIC GROWTH AUDIT REPORT.
+    Follow the EXACT structure and tone of a high-end consultant audit (clean, diagnostic, authoritative).
+
     WEBSITE DATA:
     - URL: ${scrapedData.url}
     - Title: ${scrapedData.title}
-    - Description: ${scrapedData.description}
     - Headings: H1: [${scrapedData.h1s.join(", ")}], H2: [${scrapedData.h2s.join(", ")}]
-    - CTAs Found: ${JSON.stringify(scrapedData.ctas)}
-    - Social Proof status: ${JSON.stringify(scrapedData.socialProof)}
-    - Forms: ${JSON.stringify(scrapedData.forms)}
-    - Site Map Complexity: ${scrapedData.navLinks} navigation links
-    
-    CONTENT PREVIEW:
-    ${scrapedData.bodyText}
-    
-    AUDIT FOCUS AREAS:
-    1. VALUE ARCHITECTURE: Is the brand promise immediately clear and compelling?
-    2. TRUST INFRASTRUCTURE: Is social proof and authority integrated to build genuine trust?
-    3. UX & COGNITIVE LOAD: Are there friction points or navigation issues hurting the experience?
-    4. GROWTH LEAKAGE: Where is the brand losing attention or revenue due to structural flaws?
-    
-    RULES:
-    1. ACT AS A GROWTH PARTNER, NOT A SALESPERSON.
-    2. Use the framework: "That's the issue and we can fix it by doing this".
-    3. Be highly prescriptive, authoritative, and diagnostic.
-    4. Provide specific, non-generic fixes for every problem identified.
+    - CTAs: ${JSON.stringify(scrapedData.ctas)}
+    - Site Map Complexity: ${scrapedData.navLinks} links
+    - Content Preview: ${scrapedData.bodyText.substring(0, 5000)}
+
+    PDF STRUCTURE REQUIRED (MATCH REFERENCE):
+    1. EXECUTIVE SUMMARY: 5-6 high-impact bullets on conversion drop-offs, pricing clarity, and scaling potential.
+    2. PERFORMANCE METRICS: Score the following from 1-10 based on analysis: Messaging, Trust, Performance, UX, Conversion.
+    3. BUSINESS PERFORMANCE DIAGNOSIS: 4-5 items focusing on friction, trust, and navigation. 
+    4. CUSTOMER JOURNEY BREAKDOWN: 4-5 items on funnels.
+    5. REVENUE OPPORTUNITY MAP: 4-5 items on potential.
+    6. SYSTEMIC LIMITATIONS: 3-4 items on blockers.
+    7. STRATEGIC PRIORITY FRAMEWORK: One-line strategic focuses.
+    8. STRATEGIC INSIGHT: One paragraph.
+    9. STRATEGY ALIGNMENT TEXT: A paragraph.
+
+    TONE RULES:
+    - Advisory, confident, direct.
+    - Focus on revenue leakage and growth.
+    - NO implementation tutorials.
+    - Make the solution feel non-trivial.
   `;
 
   const response = await ai.models.generateContent({
@@ -59,40 +65,43 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are the founder of Digital Matter, a high-end Growth Systems & Performance Lab. You have a direct, punchy, and highly prescriptive communication style. You diagnose 'Growth Blockers' with surgical precision. Your tone is 'Expert Partner -> Strategic Fix'. Avoid 'salesy' language or hype.",
+      systemInstruction: "You are a senior Growth Auditor for high-growth brands. You deliver sharp, high-perceived-value diagnostics that uncover hidden revenue leakage. Your tone is executive, calm, and slightly critical. You maintain branding and structure consistency across reports.",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          executiveSummary: { type: Type.STRING },
-          prioritizedIssues: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                issue: { type: Type.STRING },
-                impact: { type: Type.STRING }
-              },
-              required: ["issue", "impact"]
-            }
-          },
-          missingOpportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
-          quickWins: { type: Type.ARRAY, items: { type: Type.STRING } },
-          strategicImprovements: { type: Type.ARRAY, items: { type: Type.STRING } },
-          conversionRiskScore: { type: Type.NUMBER, description: "0-10 scale where 10 is high risk of losing customers" },
-          riskJustification: { type: Type.STRING },
-          categoryScores: {
+          executiveSummary: { type: Type.ARRAY, items: { type: Type.STRING } },
+          performanceMetrics: {
             type: Type.OBJECT,
             properties: {
-              messaging: { type: Type.NUMBER, description: "0-10 score for messaging clarity" },
-              trust: { type: Type.NUMBER, description: "0-10 score for trust indicators" },
-              performance: { type: Type.NUMBER, description: "0-10 score for perceived performance" },
-              ux: { type: Type.NUMBER, description: "0-10 score for user experience" },
-              cta: { type: Type.NUMBER, description: "0-10 score for CTA effectiveness" }
+              messaging: { type: Type.NUMBER },
+              trust: { type: Type.NUMBER },
+              performance: { type: Type.NUMBER },
+              ux: { type: Type.NUMBER },
+              conversion: { type: Type.NUMBER }
             },
-            required: ["messaging", "trust", "performance", "ux", "cta"]
-          }
+            required: ["messaging", "trust", "performance", "ux", "conversion"]
+          },
+          performanceDiagnosis: { type: Type.ARRAY, items: { type: Type.STRING } },
+          customerJourney: { type: Type.ARRAY, items: { type: Type.STRING } },
+          revenueOpportunityMap: { type: Type.ARRAY, items: { type: Type.STRING } },
+          systemicLimitations: { type: Type.ARRAY, items: { type: Type.STRING } },
+          priorityFramework: {
+            type: Type.OBJECT,
+            properties: {
+              immediate: { type: Type.STRING },
+              growth: { type: Type.STRING },
+              longTerm: { type: Type.STRING }
+            },
+            required: ["immediate", "growth", "longTerm"]
+          },
+          strategicInsight: { type: Type.STRING },
+          strategyAlignmentText: { type: Type.STRING }
         },
-        required: ["executiveSummary", "prioritizedIssues", "missingOpportunities", "quickWins", "strategicImprovements", "conversionRiskScore", "riskJustification", "categoryScores"]
+        required: [
+          "executiveSummary", "performanceMetrics", "performanceDiagnosis", "customerJourney", 
+          "revenueOpportunityMap", "systemicLimitations", "priorityFramework", 
+          "strategicInsight", "strategyAlignmentText"
+        ]
       }
     }
   });
@@ -102,20 +111,21 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
 
 export async function generateColdEmail(auditResult: AuditResult, scrapedData: any): Promise<EmailResult> {
   const prompt = `
-    Based on the following Strategic Growth Audit, generate a partner-level outreach email to the owner of ${scrapedData.url}.
+    Based on the following Strategic Growth Diagnosis, generate a partner-level outreach email to the owner of ${scrapedData.url}.
     
-    AUDIT INSIGHTS:
-    - Top Observation: ${auditResult.executiveSummary}
-    - Critical Issue: ${auditResult.prioritizedIssues[0].issue}
-    - Expert Solution: ${auditResult.strategicImprovements[0]}
+    DIAGNOSIS INSIGHTS:
+    - Top Observation: ${auditResult.executiveSummary[0]}
+    - Performance Issue: ${auditResult.performanceDiagnosis[0]?.issue || "Conversion leakage"}
+    - Systemic Limitation: ${auditResult.systemicLimitations[0]?.limitation || "Growth blocker"}
     
     EMAIL STRATEGY:
-    - Goal: Secure a 30-minute strategy call to walk through the technical fixes.
-    - Start with a technical observation—show you've actually looked at the infrastructure of ${scrapedData.url}.
-    - Explain the 'Growth Leakage'—why the current setup is costing them money.
-    - Offer the complete audit summary as a value-add.
-    - Tone: Helpful, authoritative, and direct. Zero sales fluff.
-    - CTA: Ask if they are open to a quick session this or next week to discuss the fixes.
+    - Goal: Secure a 30-minute strategy session to discuss revenue recovery and growth systems.
+    - Start with a high-level diagnostic observation—show you've analyzed the revenue architecture of ${scrapedData.url}.
+    - Explain the 'Growth Leakage'—why current structural flaws are costing profit.
+    - MANDATORY: Include this specific insight: "Even if you understand these issues, execution requires iteration, testing, and cross-functional alignment — which is where most teams stall."
+    - Position yourself as a "Growth Engine Owner".
+    - Tone: Advisory, authoritative, direct. Zero sales fluff.
+    - CTA: Ask for 30 minutes of availability to discuss the recovery roadmap and these diagnostic insights in detail.
   `;
 
   const response = await ai.models.generateContent({
@@ -123,7 +133,7 @@ export async function generateColdEmail(auditResult: AuditResult, scrapedData: a
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are the founder of Digital Matter, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on technical clarity and revenue upside. Your CTAs are low-friction and collaborative.",
+      systemInstruction: "You are the founder of Digital Matter, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on revenue recovery and long-term scaling architecture. Your CTAs are advisory and consultative.",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
