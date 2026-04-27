@@ -113,7 +113,7 @@ export default function App() {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(28);
     doc.setTextColor(lime[0], lime[1], lime[2]);
-    doc.text("CRO AUDIT REPORT", 20, 50);
+    doc.text("STRATEGIC GROWTH AUDIT", 20, 50);
     
     doc.setFontSize(10);
     doc.setTextColor(150, 150, 150);
@@ -124,14 +124,14 @@ export default function App() {
     let currentY = 85;
     doc.setFontSize(14);
     doc.setTextColor(255, 255, 255);
-    doc.text("PERFORMANCE METRICS", 20, currentY);
+    doc.text("GROWTH ECOSYSTEM DIAGNOSTICS", 20, currentY);
     
     currentY += 15;
     const scores = [
-      { label: "Messaging & Clarity", score: audit.categoryScores.messaging },
-      { label: "Trust & Social Proof", score: audit.categoryScores.trust },
-      { label: "Performance", score: audit.categoryScores.performance },
-      { label: "User Experience", score: audit.categoryScores.ux },
+      { label: "Value Architecture", score: audit.categoryScores.messaging },
+      { label: "Trust Infrastructure", score: audit.categoryScores.trust },
+      { label: "Technical Environment", score: audit.categoryScores.performance },
+      { label: "Architecture & UX", score: audit.categoryScores.ux },
       { label: "Conversion Optimization", score: audit.categoryScores.cta }
     ];
 
@@ -413,7 +413,7 @@ export default function App() {
                     <div className="p-2 bg-blue-500/10 rounded-lg">
                       <BarChart3 className="text-blue-400 w-5 h-5" />
                     </div>
-                    <h2 className="text-xl font-bold">CRO Audit Insights</h2>
+                    <h2 className="text-xl font-bold">Strategic Growth Analysis</h2>
                   </div>
 
                   {/* Category Scores Grid */}
@@ -421,9 +421,9 @@ export default function App() {
                     {[
                       { label: "Messaging", score: results.audit.categoryScores.messaging },
                       { label: "Trust", score: results.audit.categoryScores.trust },
-                      { label: "Speed", score: results.audit.categoryScores.performance },
-                      { label: "UX", score: results.audit.categoryScores.ux },
-                      { label: "CTA", score: results.audit.categoryScores.cta },
+                      { label: "Technical", score: results.audit.categoryScores.performance },
+                      { label: "UX/Arch", score: results.audit.categoryScores.ux },
+                      { label: "Revenue", score: results.audit.categoryScores.cta },
                     ].map((s, i) => (
                       <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-3 text-center">
                         <div className="text-[9px] uppercase tracking-widest text-slate-500 mb-1">{s.label}</div>

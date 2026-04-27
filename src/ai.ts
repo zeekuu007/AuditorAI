@@ -26,32 +26,32 @@ export interface EmailResult {
 
 export async function generateAudit(scrapedData: any): Promise<AuditResult> {
   const prompt = `
-    Perform a high-level Conversion Rate Optimization (CRO) audit. Focus on finding "Conversion Leakage"—where the site is losing money due to friction, lack of trust, or poor communication.
+    Perform a comprehensive "Strategic Growth & Architecture Audit" for the following website. Move beyond just surface-level CRO—analyze the entire ecosystem including branding, trust infrastructure, user experience, and revenue gaps.
     
     WEBSITE DATA:
     - URL: ${scrapedData.url}
     - Title: ${scrapedData.title}
     - Description: ${scrapedData.description}
     - Headings: H1: [${scrapedData.h1s.join(", ")}], H2: [${scrapedData.h2s.join(", ")}]
-    - CTAs found: ${JSON.stringify(scrapedData.ctas)}
-    - Social Proof: ${JSON.stringify(scrapedData.socialProof)}
-    - Form complexity: ${JSON.stringify(scrapedData.forms)}
-    - Navigation Complexity: ${scrapedData.navLinks} links in nav.
+    - CTAs Found: ${JSON.stringify(scrapedData.ctas)}
+    - Social Proof status: ${JSON.stringify(scrapedData.socialProof)}
+    - Forms: ${JSON.stringify(scrapedData.forms)}
+    - Site Map Complexity: ${scrapedData.navLinks} navigation links
     
-    BODY CONTENT PREVIEW:
+    CONTENT PREVIEW:
     ${scrapedData.bodyText}
     
-    AUDIT FOCUS:
-    1. TRUST GAPS: Is there enough social proof (testimonials, trust badges, authority)? If missing, that's a leakage point.
-    2. FRICTION POINTS: Are forms too long? Is navigation overwhelming? Are CTAs invisible or weak?
-    3. VALUE CLARITY: Does the user know EXACTLY what they get in 5 seconds?
-    4. REVENUE IMPACT: How do these issues translate to lost profit?
+    AUDIT FOCUS AREAS:
+    1. VALUE ARCHITECTURE: Is the brand promise immediately clear and compelling?
+    2. TRUST INFRASTRUCTURE: Is social proof and authority integrated to build genuine trust?
+    3. UX & COGNITIVE LOAD: Are there friction points or navigation issues hurting the experience?
+    4. GROWTH LEAKAGE: Where is the brand losing attention or revenue due to structural flaws?
     
     RULES:
-    1. DO NOT focus only on H1/Headings. Analyze the whole structure and strategy.
+    1. ACT AS A GROWTH PARTNER, NOT A SALESPERSON.
     2. Use the framework: "That's the issue and we can fix it by doing this".
-    3. Be direct, authoritative, and prescriptive.
-    4. No generic "you should improve SEO" advice. Focus on CONVERSIONS.
+    3. Be highly prescriptive, authoritative, and diagnostic.
+    4. Provide specific, non-generic fixes for every problem identified.
   `;
 
   const response = await ai.models.generateContent({
@@ -59,7 +59,7 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are a world-class CRO (Conversion Rate Optimization) expert and agency founder at Digital Matter. You hunt for 'Conversion Leakage'—the hidden reasons users don't buy. You look at trust, friction, value proposition, and information architecture. You have a direct, punchy, and highly prescriptive communication style. You don't just point out problems; you provide the exact architectural fix. Your tone is 'Problem -> Solution'. Example: 'You have zero social proof on the home page which kills trust; we can fix this by adding a verified testimonial slider above the fold.'",
+      systemInstruction: "You are the founder of Digital Matter, a high-end Growth Systems & Performance Lab. You have a direct, punchy, and highly prescriptive communication style. You diagnose 'Growth Blockers' with surgical precision. Your tone is 'Expert Partner -> Strategic Fix'. Avoid 'salesy' language or hype.",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -102,27 +102,20 @@ export async function generateAudit(scrapedData: any): Promise<AuditResult> {
 
 export async function generateColdEmail(auditResult: AuditResult, scrapedData: any): Promise<EmailResult> {
   const prompt = `
-    Based on the following CRO audit, generate a highly personalized cold email to the owner of ${scrapedData.url}.
+    Based on the following Strategic Growth Audit, generate a partner-level outreach email to the owner of ${scrapedData.url}.
     
-    AUDIT SUMMARY:
-    ${auditResult.executiveSummary}
+    AUDIT INSIGHTS:
+    - Top Observation: ${auditResult.executiveSummary}
+    - Critical Issue: ${auditResult.prioritizedIssues[0].issue}
+    - Expert Solution: ${auditResult.strategicImprovements[0]}
     
-    SPECIFIC ISSUES:
-    ${auditResult.prioritizedIssues.map(i => `- ${i.issue} (Impact: ${i.impact})`).join("\n")}
-    
-    QUICK WINS:
-    ${auditResult.quickWins.join(", ")}
-    
-    EMAIL REQUIREMENTS:
-    - 3 subject line options (curiosity-driven, non-spammy).
-    - Length: 120–180 words max.
-    - Start with a specific observation about the website (${scrapedData.url}).
-    - Mention 2–3 real issues from the audit.
-    - Explain business impact (lost leads, conversions, trust issues).
-    - End with a soft CTA (offer audit summary or quick fix list).
-    - Tone: human, confident, not salesy.
-    - NO buzzwords.
-    - NO AI mention.
+    EMAIL STRATEGY:
+    - Goal: Secure a 30-minute strategy call to walk through the technical fixes.
+    - Start with a technical observation—show you've actually looked at the infrastructure of ${scrapedData.url}.
+    - Explain the 'Growth Leakage'—why the current setup is costing them money.
+    - Offer the complete audit summary as a value-add.
+    - Tone: Helpful, authoritative, and direct. Zero sales fluff.
+    - CTA: Ask if they are open to a quick session this or next week to discuss the fixes.
   `;
 
   const response = await ai.models.generateContent({
@@ -130,7 +123,7 @@ export async function generateColdEmail(auditResult: AuditResult, scrapedData: a
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      systemInstruction: "You are the founder of Digital Matter, a high-end CRO agency. You write emails that are direct, value-heavy, and shows you've actually spent time looking at their architecture. Your tone is like a high-level partner, not a vendor. You focus on 'Conversion Gaps' and 'Fixes'.",
+      systemInstruction: "You are the founder of Digital Matter, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on technical clarity and revenue upside. Your CTAs are low-friction and collaborative.",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
