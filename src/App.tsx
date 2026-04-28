@@ -39,8 +39,8 @@ import { Logo } from "./components/Logo";
 const INITIAL_USER: User = {
   name: "Zeerak Khan",
   email: "zeerak@auditguru.ai",
-  plan: "Free",
-  auditsRemaining: 1
+  plan: "Pro",
+  auditsRemaining: 999999
 };
 
 const INITIAL_REPORTS: AuditReport[] = [
@@ -537,13 +537,13 @@ export default function App() {
           
           <div className="bg-slate-800/50 rounded-xl p-3 mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Free Audits Left</span>
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">{user.auditsRemaining}/2</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user.auditsRemaining > 1000 ? "Active Subscription" : "Free Audits Left"}</span>
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">{user.auditsRemaining > 1000 ? "PRO" : `${user.auditsRemaining}/2`}</span>
             </div>
             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-indigo-500 transition-all duration-500" 
-                style={{ width: `${(user.auditsRemaining / 2) * 100}%` }} 
+                style={{ width: `${Math.min(1, user.auditsRemaining > 1000 ? 2 : user.auditsRemaining / 2) * 100}%` }} 
               />
             </div>
           </div>
@@ -1022,7 +1022,7 @@ export default function App() {
               <div className="flex justify-between items-center mb-12">
                 <div>
                    <h1 className="text-3xl font-bold mb-2">Welcome back, {user.name.split(" ")[0]}</h1>
-                   <p className="text-slate-500 dark:text-slate-400">You have {user.auditsRemaining} free audit credits left.</p>
+                   <p className="text-slate-500 dark:text-slate-400">You have {user.auditsRemaining > 1000 ? "unlimited" : user.auditsRemaining} audit credits left.</p>
                 </div>
                 <button 
                   onClick={() => setScreen("onboarding")}

@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -148,9 +148,53 @@ async function startServer() {
     }
 
     try {
-      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp",
+        systemInstruction: "You are a senior CRO Auditor. You deliver sharp, high-perceived-value diagnostics. Your tone is executive, calm, and slightly critical.",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.OBJECT,
+            properties: {
+              score: { type: SchemaType.NUMBER },
+              estimatedRevenueLoss: { type: SchemaType.NUMBER },
+              executiveAnalysis: { type: SchemaType.STRING },
+              topIssues: { 
+                type: SchemaType.ARRAY, 
+                items: { 
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    title: { type: SchemaType.STRING },
+                    impact: { type: SchemaType.STRING },
+                    description: { type: SchemaType.STRING },
+                    fix: { type: SchemaType.STRING },
+                    whyItMatters: { type: SchemaType.STRING },
+                    potentialImpactText: { type: SchemaType.STRING }
+                  },
+                  required: ["title", "impact", "description", "fix", "whyItMatters", "potentialImpactText"]
+                }
+              },
+              quickWins: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              strategicRecommendations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              performanceMetrics: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  messaging: { type: SchemaType.NUMBER },
+                  trust: { type: SchemaType.NUMBER },
+                  performance: { type: SchemaType.NUMBER },
+                  ux: { type: SchemaType.NUMBER },
+                  conversion: { type: SchemaType.NUMBER }
+                },
+                required: ["messaging", "trust", "performance", "ux", "conversion"]
+              }
+            },
+            required: ["score", "estimatedRevenueLoss", "executiveAnalysis", "topIssues", "quickWins", "strategicRecommendations", "performanceMetrics"]
+          }
+        }
+      });
 
-      const prompt = `
+      const auditPrompt = `
         Analyze this website URL: ${url} (Industry: ${industry}) and generate a PRECISE CRO Audit.
         
         REQUIRED JSON OUTPUT:
@@ -159,7 +203,7 @@ async function startServer() {
         3. Executive Analysis: 1 authoritative paragraph.
         4. Top Issues: EXACTLY 5 high-impact entries.
            - Title (e.g., "Weak Value Proposition")
-           - Impact (High/Medium/Low)
+           - Impact (High, Medium, or Low)
            - Description
            - Fix: Specific actionable recommendation.
            - WhyItMatters: Behavioral psychology explanation.
@@ -171,53 +215,9 @@ async function startServer() {
         TONE: Advisory, slightly critical, growth-focused.
       `;
 
-      const response = await genAI.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          systemInstruction: "You are a senior CRO Auditor. You deliver sharp, high-perceived-value diagnostics. Your tone is executive, calm, and slightly critical.",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              score: { type: Type.NUMBER },
-              estimatedRevenueLoss: { type: Type.NUMBER },
-              executiveAnalysis: { type: Type.STRING },
-              topIssues: { 
-                type: Type.ARRAY, 
-                items: { 
-                  type: Type.OBJECT,
-                  properties: {
-                    title: { type: Type.STRING },
-                    impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
-                    description: { type: Type.STRING },
-                    fix: { type: Type.STRING },
-                    whyItMatters: { type: Type.STRING },
-                    potentialImpactText: { type: Type.STRING }
-                  },
-                  required: ["title", "impact", "description", "fix", "whyItMatters", "potentialImpactText"]
-                }
-              },
-              quickWins: { type: Type.ARRAY, items: { type: Type.STRING } },
-              strategicRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
-              performanceMetrics: {
-                type: Type.OBJECT,
-                properties: {
-                  messaging: { type: Type.NUMBER },
-                  trust: { type: Type.NUMBER },
-                  performance: { type: Type.NUMBER },
-                  ux: { type: Type.NUMBER },
-                  conversion: { type: Type.NUMBER }
-                },
-                required: ["messaging", "trust", "performance", "ux", "conversion"]
-              }
-            },
-            required: ["score", "estimatedRevenueLoss", "executiveAnalysis", "topIssues", "quickWins", "strategicRecommendations", "performanceMetrics"]
-          }
-        }
-      });
-
-      res.json(JSON.parse(response.text));
+      const result = await model.generateContent(auditPrompt);
+      const response = await result.response;
+      res.json(JSON.parse(response.text()));
     } catch (error: any) {
       console.error("Audit generation error:", error.message);
       res.status(500).json({ error: `Failed to generate audit: ${error.message}` });
@@ -233,9 +233,24 @@ async function startServer() {
     }
 
     try {
-      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp",
+        systemInstruction: "You are the founder of AuditGuru, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on revenue recovery and long-term scaling architecture. Your CTAs are advisory and consultative.",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.OBJECT,
+            properties: {
+              subjectLines: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              body: { type: SchemaType.STRING }
+            },
+            required: ["subjectLines", "body"]
+          }
+        }
+      });
 
-      const prompt = `
+      const emailPrompt = `
         Based on the following Strategic Growth Diagnosis, generate a partner-level outreach email to the owner of ${scrapedData.url}.
         
         DIAGNOSIS INSIGHTS:
@@ -251,24 +266,9 @@ async function startServer() {
         - CTA: Ask for 30 minutes of availability.
       `;
 
-      const response = await genAI.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          systemInstruction: "You are the founder of AuditGuru, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on revenue recovery and long-term scaling architecture. Your CTAs are advisory and consultative.",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              subjectLines: { type: Type.ARRAY, items: { type: Type.STRING } },
-              body: { type: Type.STRING }
-            },
-            required: ["subjectLines", "body"]
-          }
-        }
-      });
-
-      res.json(JSON.parse(response.text));
+      const result = await model.generateContent(emailPrompt);
+      const response = await result.response;
+      res.json(JSON.parse(response.text()));
     } catch (error: any) {
       console.error("Email generation error:", error.message);
       res.status(500).json({ error: `Failed to generate email: ${error.message}` });
