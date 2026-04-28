@@ -32,8 +32,8 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import { generateAudit, AuditResult } from "./ai";
-import { Screen, User, AuditReport } from "./types";
+import { generateAudit } from "./ai";
+import { Screen, User, AuditReport, AuditResult } from "./types";
 
 const INITIAL_USER: User = {
   name: "Zeerak Khan",

@@ -3,6 +3,10 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { GoogleGenAI, Type } from "@google/genai";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function startServer() {
   const app = express();
@@ -132,6 +136,142 @@ async function startServer() {
       }
       
       res.status(500).json({ error: `Failed to scrape website: ${clientMessage}` });
+    }
+  });
+
+  // API Route: Audit Generation
+  app.post("/api/audit", async (req, res) => {
+    const { url, industry } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+    }
+
+    try {
+      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+      const prompt = `
+        Analyze this website URL: ${url} (Industry: ${industry}) and generate a PRECISE CRO Audit.
+        
+        REQUIRED JSON OUTPUT:
+        1. Score (45-85)
+        2. Estimated Revenue Loss (Between $2,000 and $15,000 per month)
+        3. Executive Analysis: 1 authoritative paragraph.
+        4. Top Issues: EXACTLY 5 high-impact entries.
+           - Title (e.g., "Weak Value Proposition")
+           - Impact (High/Medium/Low)
+           - Description
+           - Fix: Specific actionable recommendation.
+           - WhyItMatters: Behavioral psychology explanation.
+           - PotentialImpactText: Estimated monthly revenue recovery for this fix (e.g. "$2,450 / month").
+        5. Quick Wins: 5 actionable bullet points.
+        6. Strategic Recommendations: 3 high-level shifts.
+        7. Performance Metrics: 1-10 scores for messaging, trust, performance, ux, and conversion.
+
+        TONE: Advisory, slightly critical, growth-focused.
+      `;
+
+      const response = await genAI.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          systemInstruction: "You are a senior CRO Auditor. You deliver sharp, high-perceived-value diagnostics. Your tone is executive, calm, and slightly critical.",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              score: { type: Type.NUMBER },
+              estimatedRevenueLoss: { type: Type.NUMBER },
+              executiveAnalysis: { type: Type.STRING },
+              topIssues: { 
+                type: Type.ARRAY, 
+                items: { 
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
+                    description: { type: Type.STRING },
+                    fix: { type: Type.STRING },
+                    whyItMatters: { type: Type.STRING },
+                    potentialImpactText: { type: Type.STRING }
+                  },
+                  required: ["title", "impact", "description", "fix", "whyItMatters", "potentialImpactText"]
+                }
+              },
+              quickWins: { type: Type.ARRAY, items: { type: Type.STRING } },
+              strategicRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
+              performanceMetrics: {
+                type: Type.OBJECT,
+                properties: {
+                  messaging: { type: Type.NUMBER },
+                  trust: { type: Type.NUMBER },
+                  performance: { type: Type.NUMBER },
+                  ux: { type: Type.NUMBER },
+                  conversion: { type: Type.NUMBER }
+                },
+                required: ["messaging", "trust", "performance", "ux", "conversion"]
+              }
+            },
+            required: ["score", "estimatedRevenueLoss", "executiveAnalysis", "topIssues", "quickWins", "strategicRecommendations", "performanceMetrics"]
+          }
+        }
+      });
+
+      res.json(JSON.parse(response.text));
+    } catch (error: any) {
+      console.error("Audit generation error:", error.message);
+      res.status(500).json({ error: `Failed to generate audit: ${error.message}` });
+    }
+  });
+
+  // API Route: Email Generation
+  app.post("/api/email", async (req, res) => {
+    const { auditResult, scrapedData } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+    }
+
+    try {
+      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+      const prompt = `
+        Based on the following Strategic Growth Diagnosis, generate a partner-level outreach email to the owner of ${scrapedData.url}.
+        
+        DIAGNOSIS INSIGHTS:
+        - Top Observation: ${auditResult.executiveAnalysis}
+        - Growth Opportunity: ${auditResult.topIssues[0]?.title}
+        
+        EMAIL STRATEGY:
+        - Goal: Secure a 30-minute strategy session to discuss revenue recovery and growth systems.
+        - Start with a high-level diagnostic observation—show you've analyzed the revenue architecture of ${scrapedData.url}.
+        - Explain the 'Growth Leakage'—why current structural flaws are costing profit.
+        - Position yourself as a "Growth Engine Owner".
+        - Tone: Advisory, authoritative, direct. Zero sales fluff.
+        - CTA: Ask for 30 minutes of availability.
+      `;
+
+      const response = await genAI.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          systemInstruction: "You are the founder of AuditGuru, a high-end Growth Systems & Performance Lab. You write emails that sound like a partner reaching out to fix a problem, not a vendor pitching a service. You focus on revenue recovery and long-term scaling architecture. Your CTAs are advisory and consultative.",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              subjectLines: { type: Type.ARRAY, items: { type: Type.STRING } },
+              body: { type: Type.STRING }
+            },
+            required: ["subjectLines", "body"]
+          }
+        }
+      });
+
+      res.json(JSON.parse(response.text));
+    } catch (error: any) {
+      console.error("Email generation error:", error.message);
+      res.status(500).json({ error: `Failed to generate email: ${error.message}` });
     }
   });
 
