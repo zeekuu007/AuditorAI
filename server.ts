@@ -4,6 +4,7 @@ import path from "path";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import dotenv from "dotenv";
+import { GoogleGenAI, Type } from "@google/genai";
 
 dotenv.config();
 
@@ -20,6 +21,10 @@ async function startServer() {
   });
 
   app.use(express.json());
+
+  const ai = new GoogleGenAI({ 
+    apiKey: process.env.GEMINI_API_KEY || "" 
+  });
 
   // Health check
   app.get("/api/health", (req, res) => {
@@ -150,6 +155,97 @@ async function startServer() {
       }
       
       res.status(500).json({ error: `Failed to scrape website: ${clientMessage}` });
+    }
+  });
+
+  // API Route: Audit Generation
+  app.post("/api/audit", async (req, res) => {
+    console.log("POST /api/audit - Request received");
+    const { url, industry, scrapedData } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+    }
+
+    try {
+      const model = "gemini-1.5-flash";
+      
+      const prompt = `
+        Analyze this website URL: ${url} (Industry: ${industry}) and generate a PRECISE CRO Audit based on this scraped data:
+        ${JSON.stringify(scrapedData, null, 2)}
+        
+        REQUIRED JSON OUTPUT:
+        1. Score (45-85)
+        2. Estimated Revenue Loss (Between $2,000 and $15,000 per month)
+        3. Executive Analysis: 1 authoritative paragraph.
+        4. Top Issues: EXACTLY 5 high-impact entries.
+           - title
+           - impact (High, Medium, or Low)
+           - description
+           - fix
+           - whyItMatters
+           - potentialImpactText
+        5. Quick Wins: 5 actionable bullet points.
+        6. Strategic Recommendations: 3 high-level shifts.
+        7. Performance Metrics: 1-10 scores for messaging, trust, performance, ux, and conversion.
+      `;
+
+      const result = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+        }
+      });
+
+      if (!result.text) throw new Error("Empty response from AI engine");
+      res.json(JSON.parse(result.text));
+    } catch (error: any) {
+      console.error("Audit generation error:", error.message);
+      res.status(500).json({ error: `Failed to generate audit: ${error.message}` });
+    }
+  });
+
+  // API Route: Email Generation
+  app.post("/api/email", async (req, res) => {
+    console.log("POST /api/email - Request received");
+    const { auditResult, scrapedData } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+    }
+
+    try {
+      const model = "gemini-1.5-flash";
+      
+      const prompt = `
+        Based on the following Strategic Growth Diagnosis, generate a partner-level outreach email to the owner of ${scrapedData.url}.
+        
+        DIAGNOSIS INSIGHTS:
+        - Top Observation: ${auditResult.executiveAnalysis}
+        - Growth Opportunity: ${auditResult.topIssues[0]?.title}
+        
+        EMAIL STRATEGY:
+        - Goal: Secure a 30-minute strategy session.
+        - Focus on 'Growth Leakage'.
+        - Tone: Advisory, authoritative.
+        
+        Return JSON with: subjectLines (array), body (string).
+      `;
+
+      const result = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+        }
+      });
+
+      if (!result.text) throw new Error("Empty response from AI engine");
+      res.json(JSON.parse(result.text));
+    } catch (error: any) {
+      console.error("Email generation error:", error.message);
+      res.status(500).json({ error: `Failed to generate email: ${error.message}` });
     }
   });
 
