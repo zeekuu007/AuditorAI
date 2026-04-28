@@ -4,6 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Google AI Studio App</title>
+    <script>
+      // Suppress known environmental errors that don't originate from the app
+      (function() {
+        const suppressedKeywords = ['MetaMask', 'ethereum', 'property fetch', 'web3'];
+        
+        window.addEventListener('error', function(event) {
+          if (event.message && suppressedKeywords.some(keyword => event.message.includes(keyword))) {
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          const reason = event.reason && (event.reason.message || String(event.reason));
+          if (reason && suppressedKeywords.some(keyword => reason.includes(keyword))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        });
+
+        // Also intercept console.error for these specific environmental messages
+        const originalConsoleError = console.error;
+        console.error = function() {
+          const args = Array.from(arguments);
+          const message = args.join(' ');
+          if (suppressedKeywords.some(keyword => message.includes(keyword))) {
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

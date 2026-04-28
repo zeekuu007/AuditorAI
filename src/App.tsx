@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { jsPDF } from "jspdf";
+import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { 
   LayoutDashboard, 
@@ -70,6 +70,30 @@ const INITIAL_REPORTS: AuditReport[] = [
           fix: "Move testimonials to the 'above-the-fold' section and include customer logos for credibility.",
           whyItMatters: "Trust signals are most effective near the decision point.",
           potentialImpactText: "+8% Trust"
+        },
+        {
+          title: "Confusing Error Messaging",
+          impact: "Low",
+          description: "Field validation errors are generic and don't guide the user on how to fix them.",
+          fix: "Implement inline validation with clear instructions on how to correct common errors.",
+          whyItMatters: "Clarity in user feedback reduces frustration and abandonment.",
+          potentialImpactText: "+2% Retention"
+        },
+        {
+          title: "Missing 'Guest' Checkout Option",
+          impact: "High",
+          description: "Forcing account creation before purchase is a major conversion blocker.",
+          fix: "Enable guest checkout and offer account creation on the 'Thank You' page instead.",
+          whyItMatters: "Frictionless checkout is the fastest path to revenue.",
+          potentialImpactText: "+15% Conversion"
+        },
+        {
+          title: "Slow Landing Page Load Time",
+          impact: "Medium",
+          description: "The initial page load is 4.2s on mobile, which is double the industry standard.",
+          fix: "Optimize images, implement lazy loading, and compress CSS/JS files.",
+          whyItMatters: "Every second of delay reduces conversion by up to 7%.",
+          potentialImpactText: "+5% CR Improvement"
         }
       ],
       quickWins: ["Add trust badges", "Shorten footer", "Fix mobile padding"],
@@ -79,31 +103,120 @@ const INITIAL_REPORTS: AuditReport[] = [
   },
   { 
     id: "2", 
-    url: "mystore.com", 
+    url: "wellness-cat.com", 
     industry: "E-commerce", 
-    score: 78, 
+    score: 96, 
     date: "May 18, 2024", 
     status: "Completed",
     result: {
-      score: 78,
-      estimatedRevenueLoss: 1200,
-      executiveAnalysis: "Great design and trust signals. Focus on mobile checkout speed to capture the remaining 22%.",
+      score: 96,
+      estimatedRevenueLoss: 450,
+      executiveAnalysis: "Outstanding conversion architecture. The site leverages social proof and clear urgency markers effectively. Only minor technical debt remains.",
       topIssues: [
         {
-          title: "Mobile Load Speed",
+          title: "Micro-copy Clarity",
+          impact: "Low",
+          description: "Shipping policy links are slightly hidden in the footer.",
+          fix: "Move shipping info closer to the 'Add to Cart' button.",
+          whyItMatters: "Removing small frictions near the checkout increases completion rates.",
+          potentialImpactText: "+1% LTV"
+        },
+        {
+          title: "Abandoned Cart Reminders",
           impact: "Medium",
-          description: "Largest Contentful Paint (LCP) is 3.2s on 4G connections.",
-          fix: "Optimize images using WebP format and lazy-load non-critical assets.",
-          whyItMatters: "Pages that load in <2s have 2x the conversion of slower ones.",
-          potentialImpactText: "+5% Revenue"
+          description: "No automatic follow-up for users who leave items in their cart.",
+          fix: "Implement a 3-step email sequence for abandoned carts.",
+          whyItMatters: "Cart recovery can drive up to 10% more revenue with zero spend.",
+          potentialImpactText: "+5% Sales"
+        },
+        {
+          title: "Sticky Header Navigation",
+          impact: "Low",
+          description: "Desktop navigation disappears on scroll, making it harder to navigate back.",
+          fix: "Make the header sticky so 'Shop Now' is always visible.",
+          whyItMatters: "Reducing effort to navigate improves browsing depth.",
+          potentialImpactText: "+2% PV/Session"
+        },
+        {
+          title: "Instagram Feed Lag",
+          impact: "Low",
+          description: "The social feed widget loads before the main content.",
+          fix: "Lazy-load social widgets after the hero section is ready.",
+          whyItMatters: "Speed impacts perceived value and bounce rates.",
+          potentialImpactText: "+1% Retention"
+        },
+        {
+          title: "Benefit-First Headlines",
+          impact: "Medium",
+          description: "Headlines focus on features rather than outcomes for cats.",
+          fix: "Rewrite headlines to lead with 'Happier, Healthier Cats' messaging.",
+          whyItMatters: "Emotional connection drives purchase intent in pets niche.",
+          potentialImpactText: "+4% CTR"
         }
       ],
-      quickWins: ["Fix broken links", "Optimize hero image"],
-      strategicRecommendations: ["Run A/B test on cart button", "Add exit-intent popup"],
-      performanceMetrics: { messaging: 9, trust: 8, performance: 6, ux: 8, conversion: 8 }
+      quickWins: ["Update meta descriptions", "Add favicon"],
+      strategicRecommendations: ["Loyalty program implementation"],
+      performanceMetrics: { messaging: 9, trust: 9, performance: 9, ux: 10, conversion: 9 }
     }
   },
-  { id: "3", url: "brand.io", industry: "Agency", score: 45, date: "May 15, 2024", status: "Completed" },
+  { 
+    id: "3", 
+    url: "brand.io", 
+    industry: "Agency", 
+    score: 45, 
+    date: "May 15, 2024", 
+    status: "Completed",
+    result: {
+      score: 45,
+      estimatedRevenueLoss: 8500,
+      executiveAnalysis: "Critical issues detected. The site lacks a secure connection and fundamental SEO metadata, leading to high bounce rates and massive trust deficits in the eyes of visitors.",
+      topIssues: [
+        {
+          title: "Missing SSL Certificate",
+          impact: "High",
+          description: "Site is currently serving over HTTP, flagging 'Not Secure' in modern browsers.",
+          fix: "Install an SSL certificate immediately and force HTTPS redirection.",
+          whyItMatters: "Security is non-negotiable for modern trust and SEO ranking.",
+          potentialImpactText: "+40% Trust"
+        },
+        {
+          title: "Unoptimized Hero Image",
+          impact: "Medium",
+          description: "The main hero image is 4MB, delaying rendering significantly and hurting LCP scores.",
+          fix: "Resize and compress images to under 200KB.",
+          whyItMatters: "Visual stability and speed are key to professional first impressions.",
+          potentialImpactText: "+12% Speed"
+        },
+        {
+          title: "Complex Checkout Flow",
+          impact: "High",
+          description: "The multi-step process for a simple service leads to high drop-off rates.",
+          fix: "Simplify to a single-page checkout process.",
+          whyItMatters: "Every additional field is an opportunity for the user to leave.",
+          potentialImpactText: "+20% Sales"
+        },
+        {
+          title: "Hidden Contact Information",
+          impact: "Medium",
+          description: "Users have to scroll through multiple pages to find a way to get help.",
+          fix: "Place a 'Contact Us' link prominently in the header and footer.",
+          whyItMatters: "Accessibility builds reliability and perceived support quality.",
+          potentialImpactText: "+8% Leads"
+        },
+        {
+          title: "No Value Proposition",
+          impact: "High",
+          description: "The headline is generic and doesn't explain what the agency does differently.",
+          fix: "Rewrite the hero section to focus on the unique value provided to clients.",
+          whyItMatters: "Clarity in the first 3 seconds is vital for retention.",
+          potentialImpactText: "+15% Engagement"
+        }
+      ],
+      quickWins: ["Set up SSL", "Add meta titles", "Compress main image"],
+      strategicRecommendations: ["Full site speed optimization", "Rebranding strategy"],
+      performanceMetrics: { messaging: 4, trust: 2, performance: 3, ux: 5, conversion: 3 }
+    }
+  },
   { id: "4", url: "shop.com", industry: "Retail", score: 71, date: "May 12, 2024", status: "Locked" },
 ];
 
@@ -130,83 +243,181 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  const downloadPDF = (report: AuditReport | null = null) => {
-    const auditData = report?.result || currentAudit;
-    const auditUrl = report?.url || url;
-    
-    if (!auditData) return;
+  const downloadPDF = async (report: AuditReport | null = null) => {
+    try {
+      const auditData = report?.result || currentAudit;
+      const auditUrl = report?.url || url;
+      
+      if (!auditData) {
+        alert("No audit data available for this site yet.");
+        return;
+      }
 
-    const doc = new jsPDF();
-    const indigo: [number, number, number] = [79, 70, 229]; // Indigo-600
-    const slate: [number, number, number] = [15, 23, 42]; // Slate-950
-    const white: [number, number, number] = [255, 255, 255];
+      const doc = new jsPDF();
+      const white: [number, number, number] = [255, 255, 255];
+      const black: [number, number, number] = [0, 0, 0];
+      const lime: [number, number, number] = [163, 230, 53]; 
+      const slateDark: [number, number, number] = [15, 23, 42];
+      const logoUrl = "https://storage.googleapis.com/bit_app_artifacts/AuditGuru/logo.png";
 
-    // Header
-    doc.setFillColor(slate[0], slate[1], slate[2]);
-    doc.rect(0, 0, 210, 40, 'F');
-    
-    doc.setTextColor(white[0], white[1], white[2]);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("CRO AUDIT REPORT", 20, 25);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`URL: ${auditUrl}`, 20, 32);
-    doc.text(`DATE: ${report?.date || new Date().toLocaleDateString()}`, 190, 32, { align: 'right' });
+      const getBase64Image = async (url: string): Promise<string | null> => {
+        try {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        } catch (e) {
+          return null;
+        }
+      };
 
-    // Score Circle replacement for PDF
-    doc.setDrawColor(indigo[0], indigo[1], indigo[2]);
-    doc.setLineWidth(2);
-    doc.circle(170, 65, 15);
-    doc.setFontSize(18);
-    doc.setTextColor(indigo[0], indigo[1], indigo[2]);
-    doc.text(`${auditData.score}`, 170, 67, { align: 'center' });
-    doc.setFontSize(8);
-    doc.text("HEALTH SCORE", 170, 72, { align: 'center' });
+      const logoData = await getBase64Image(logoUrl);
 
-    // Executive Analysis
-    doc.setTextColor(slate[0], slate[1], slate[2]);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("EXECUTIVE ANALYSIS", 20, 60);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const analysisLines = doc.splitTextToSize(auditData.executiveAnalysis, 130);
-    doc.text(analysisLines, 20, 70);
+      // --- HEADER (Dark Branding) ---
+      doc.setFillColor(10, 10, 10);
+      doc.rect(0, 0, 210, 50, 'F');
+      
+      // Branding: DIGITAL MATTER.
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(255, 255, 255);
+      doc.text("DIGITAL", 20, 25);
+      
+      const digitalWidth = doc.getTextWidth("DIGITAL ");
+      doc.setTextColor(lime[0], lime[1], lime[2]);
+      doc.text("MATTER.", 20 + digitalWidth, 25);
 
-    // Revenue Loss
-    let currentY = 100;
-    doc.setFillColor(254, 242, 242); // Red-50
-    doc.rect(20, currentY, 170, 25, 'F');
-    doc.setTextColor(220, 38, 38); // Red-600
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("ESTIMATED MONTHLY REVENUE LOSS", 105, currentY + 10, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text(`$${auditData.estimatedRevenueLoss.toLocaleString()}`, 105, currentY + 18, { align: 'center' });
+      // Tagline: D I G I T A L L Y   Y O U R S
+      doc.setFont("courier", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(140, 140, 140);
+      // Roughly align S below R of MATTER
+      doc.text("D I G I T A L L Y   Y O U R S", 20, 32);
 
-    currentY += 40;
+      doc.setTextColor(lime[0], lime[1], lime[2]);
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.text("CRO AUDIT REPORT", 200, 24, { align: 'right' });
+      
+      doc.setTextColor(180, 180, 180);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Prepared for: ${auditUrl.toUpperCase()}`, 200, 34, { align: 'right' });
+      doc.text(`DATE Created: ${report?.date || new Date().toLocaleDateString()}`, 200, 40, { align: 'right' });
 
-    // Top Issues Table
-    doc.setTextColor(indigo[0], indigo[1], indigo[2]);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("TOP CONVERSION ISSUES", 20, currentY);
+      // --- BODY (White) ---
+      let currentY = 65;
 
-    autoTable(doc, {
-      startY: currentY + 5,
-      head: [['Issue', 'Impact', 'Description']],
-      body: auditData.topIssues.map(issue => [issue.title, issue.impact, issue.description]),
-      theme: 'grid',
-      headStyles: { fillColor: indigo, textColor: white },
-      styles: { fontSize: 8, cellPadding: 5 },
-      columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 20 }, 2: { cellWidth: 110 } }
-    });
+      const scScore = auditData.score || 0;
+      let scColor: [number, number, number] = [220, 38, 38]; 
+      if (scScore >= 95) scColor = [16, 185, 129];
+      else if (scScore >= 60) scColor = [245, 158, 11];
+      
+      doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
+      doc.setLineWidth(2.5);
+      doc.circle(170, currentY + 12, 18);
+      doc.setFontSize(22);
+      doc.setTextColor(scColor[0], scColor[1], scColor[2]);
+      doc.text(`${scScore}`, 170, currentY + 14, { align: 'center' });
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("SCORE", 170, currentY + 20, { align: 'center' });
 
-    const hostname = auditUrl.replace(/https?:\/\//, '').split('/')[0];
-    doc.save(`Audit-${hostname}.pdf`);
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(15);
+      doc.setFont("helvetica", "bold");
+      doc.text("EXECUTIVE ANALYSIS", 20, currentY + 8);
+      
+      doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
+      doc.setLineWidth(1.5);
+      doc.line(20, currentY + 11, 45, currentY + 11);
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      const analysisLines = doc.splitTextToSize(auditData.executiveAnalysis || "No analysis available.", 125);
+      doc.text(analysisLines, 20, currentY + 22, { align: 'justify', maxWidth: 125 });
+
+      // Spacing fix for revenue loss box
+      currentY += Math.max(55, (analysisLines.length * 5) + 30);
+
+      doc.setLineWidth(1.5);
+      doc.setFillColor(254, 242, 242);
+      doc.setDrawColor(252, 165, 165);
+      doc.roundedRect(20, currentY, 170, 30, 4, 4, 'FD');
+      doc.setTextColor(220, 38, 38);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("ESTIMATED MONTHLY REVENUE LOSS", 105, currentY + 10, { align: 'center' });
+      doc.setFontSize(22);
+      doc.text(`$${(auditData.estimatedRevenueLoss || 0).toLocaleString()}`, 105, currentY + 22, { align: 'center' });
+
+      currentY += 45;
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("TOP CONVERSION HURDLES", 20, currentY);
+      
+      autoTable(doc, {
+        startY: currentY + 6,
+        head: [['ISSUE', 'IMPACT', 'RECOMMENDED FIX']],
+        body: auditData.topIssues.map(issue => [issue.title.toUpperCase(), issue.impact, issue.fix]),
+        theme: 'striped',
+        headStyles: { fillColor: slateDark, textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 9, cellPadding: 5 },
+        columnStyles: { 
+          0: { cellWidth: 60, fontStyle: 'bold', fontSize: 8.5 }, 
+          1: { cellWidth: 25, halign: 'center' }, 
+          2: { cellWidth: 85 } 
+        },
+        didParseCell: (data: any) => {
+          if (data.section === 'body' && data.column.index === 1) {
+            const val = data.cell.raw;
+            if (val === 'High') data.cell.styles.textColor = [220, 38, 38];
+            else if (val === 'Medium') data.cell.styles.textColor = [249, 115, 22]; // Orange
+            else if (val === 'Low') data.cell.styles.textColor = [234, 179, 8]; // Yellow
+          }
+        }
+      });
+
+      const afterTableY = (doc as any).lastAutoTable.finalY + 15;
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.text("NEXT STEPS: STOP THE REVENUE LEAKS", 20, afterTableY);
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      const closing = "Let's dive deeper into these results and build a concrete game plan to plug your revenue leaks. Schedule a quick 30-minute Strategy Call with our team to recover your lost conversions today.";
+      const closingLines = doc.splitTextToSize(closing, 170);
+      doc.text(closingLines, 20, afterTableY + 10);
+
+      const pagesCount = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pagesCount; i++) {
+        doc.setPage(i);
+        if (logoData) {
+          (doc as any).saveGraphicsState();
+          (doc as any).setGState(new (doc as any).GState({ opacity: 0.12 }));
+          doc.addImage(logoData, 'PNG', 45, 90, 120, 120);
+          (doc as any).restoreGraphicsState();
+        }
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text("THE DIGITAL MATTER | GROWTH SYSTEMS & PERFORMANCE LAB", 105, 285, { align: 'center' });
+        doc.text(`Page ${i}/${pagesCount}`, 195, 285, { align: 'right' });
+      }
+
+      doc.save(`Audit-${auditUrl.replace(/https?:\/\//, '').split('/')[0]}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate PDF.");
+    }
   };
 
   const handleUpgrade = (plan: string) => {

@@ -38,14 +38,14 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
     1. Score (45-85)
     2. Estimated Revenue Loss (Random between $2,000 and $15,000 per month)
     3. Executive Analysis: 1 authoritative paragraph.
-    4. Top Issues: 3 high-impact entries.
+    4. Top Issues: EXACTLY 5 high-impact entries.
        - Title (e.g., "Weak Value Proposition")
        - Impact (High/Medium/Low)
        - Description
        - Fix: Specific actionable recommendation.
        - WhyItMatters: Behavioral psychology explanation.
        - PotentialImpactText: Estimated monthly revenue recovery for this fix (e.g. "$2,450 / month").
-    5. Quick Wins: 3 bullet points.
+    5. Quick Wins: 5 actionable bullet points.
     6. Strategic Recommendations: 3 high-level shifts.
     7. Performance Metrics: 1-10 scores.
 
