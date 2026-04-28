@@ -28,6 +28,7 @@ async function startServer() {
 
   // API Route: Scrape
   app.post("/api/scrape", async (req, res) => {
+    // ... existing scrape logic ...
     console.log("POST /api/scrape - Request received");
     const { url } = req.body;
 
