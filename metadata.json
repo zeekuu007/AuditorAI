@@ -1,6 +1,6 @@
 {
-  "name": "AuditBot: Website Audit & Cold Email Generator",
-  "description": "Scrape websites, perform AI-driven CRO audits, and generate personalized cold emails in seconds.",
+  "name": "AuditGuru",
+  "description": "Premium AI-driven CRO audit tool that identifies revenue leakage and conversion blockers.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
