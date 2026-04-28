@@ -224,6 +224,7 @@ const INITIAL_REPORTS: AuditReport[] = [
 export default function App() {
   const [screen, setScreen] = useState<Screen>("onboarding");
   const [user, setUser] = useState<User>(INITIAL_USER);
+  const [error, setError] = useState<string | null>(null);
   const [reports, setReports] = useState<AuditReport[]>(INITIAL_REPORTS);
   
   // Audit State
@@ -461,6 +462,7 @@ export default function App() {
     
     setScreen("analyzing");
     setProgress(0);
+    setError(null);
     
     try {
       // We pass the industry too
@@ -473,16 +475,18 @@ export default function App() {
         industry: industry || "General",
         score: result.score,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        status: user.auditsRemaining > 0 ? "Completed" : "Locked",
+        status: (user.auditsRemaining > 0 || user.plan === "Pro") ? "Completed" : "Locked",
         result
       };
       
       setReports(prev => [newReport, ...prev]);
-      if (user.auditsRemaining > 0) {
+      if (user.auditsRemaining > 0 && user.plan !== "Pro") {
         setUser(prev => ({ ...prev, auditsRemaining: prev.auditsRemaining - 1 }));
       }
-    } catch (error) {
-      console.error("Audit failed", error);
+      setScreen("overview");
+    } catch (err: any) {
+      console.error("Audit failed", err);
+      setError(err.message || "Failed to generate audit. Please try again.");
       setScreen("onboarding");
     }
   };
@@ -537,13 +541,13 @@ export default function App() {
           
           <div className="bg-slate-800/50 rounded-xl p-3 mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user.auditsRemaining > 1000 ? "Active Subscription" : "Free Audits Left"}</span>
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">{user.auditsRemaining > 1000 ? "PRO" : `${user.auditsRemaining}/2`}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user.plan === "Pro" ? "Active Subscription" : "Free Audits Left"}</span>
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">{user.plan === "Pro" ? "Unlimited" : `${user.auditsRemaining}/2`}</span>
             </div>
             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-indigo-500 transition-all duration-500" 
-                style={{ width: `${Math.min(1, user.auditsRemaining > 1000 ? 2 : user.auditsRemaining / 2) * 100}%` }} 
+                style={{ width: `${user.plan === "Pro" ? 100 : (user.auditsRemaining / 2) * 100}%` }} 
               />
             </div>
           </div>
@@ -583,6 +587,12 @@ export default function App() {
                   </p>
 
                   <form onSubmit={runAudit} className="space-y-6">
+                    {error && (
+                      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 text-sm">
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                        <p>{error}</p>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Website URL</label>
                       <div className="relative">

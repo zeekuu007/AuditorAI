@@ -16,6 +16,7 @@ async function startServer() {
 
   // API Route: Scrape
   app.post("/api/scrape", async (req, res) => {
+    console.log("POST /api/scrape - Request received");
     const { url } = req.body;
 
     if (!url) {
@@ -141,13 +142,16 @@ async function startServer() {
 
   // API Route: Audit Generation
   app.post("/api/audit", async (req, res) => {
+    console.log("POST /api/audit - Request received");
     const { url, industry } = req.body;
     
     if (!process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY missing");
       return res.status(500).json({ error: "Gemini API key is not configured on the server." });
     }
 
     try {
+      console.log(`Generating audit for ${url} in ${industry}...`);
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
       const model = genAI.getGenerativeModel({ 
         model: "gemini-2.0-flash-exp",
@@ -226,6 +230,7 @@ async function startServer() {
 
   // API Route: Email Generation
   app.post("/api/email", async (req, res) => {
+    console.log("POST /api/email - Request received");
     const { auditResult, scrapedData } = req.body;
     
     if (!process.env.GEMINI_API_KEY) {
