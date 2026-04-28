@@ -439,10 +439,8 @@ export default function App() {
       let i = 0;
       const interval = setInterval(() => {
         setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setScreen("overview");
-            return 100;
+          if (prev >= 95) {
+            return 95;
           }
           const next = prev + 1;
           if (next % 20 === 0 && i < texts.length - 1) {
@@ -451,7 +449,7 @@ export default function App() {
           }
           return next;
         });
-      }, 50);
+      }, 100); // Slower for better UX
       return () => clearInterval(interval);
     }
   }, [screen]);
@@ -483,6 +481,7 @@ export default function App() {
       if (user.auditsRemaining > 0 && user.plan !== "Pro") {
         setUser(prev => ({ ...prev, auditsRemaining: prev.auditsRemaining - 1 }));
       }
+      setProgress(100);
       setScreen("overview");
     } catch (err: any) {
       console.error("Audit failed", err);
