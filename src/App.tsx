@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { generateAudit } from "./ai";
 import { Screen, User, AuditReport, AuditResult } from "./types";
+import { Logo } from "./components/Logo";
 
 const INITIAL_USER: User = {
   name: "Zeerak Khan",
@@ -256,52 +257,51 @@ export default function App() {
       const doc = new jsPDF();
       const white: [number, number, number] = [255, 255, 255];
       const black: [number, number, number] = [0, 0, 0];
-      const lime: [number, number, number] = [163, 230, 53]; 
+      const violet: [number, number, number] = [139, 92, 246]; // violet-500
+      const teal: [number, number, number] = [45, 212, 191]; // teal-400
       const slateDark: [number, number, number] = [15, 23, 42];
-      const logoUrl = "https://storage.googleapis.com/bit_app_artifacts/AuditGuru/logo.png";
-
-      const getBase64Image = async (url: string): Promise<string | null> => {
-        try {
-          const response = await fetch(url);
-          const blob = await response.blob();
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        } catch (e) {
-          return null;
-        }
+      
+      // we'll draw the magnifying glass logo manually in PDF
+      const drawLogo = (doc: jsPDF, x: number, y: number, scale: number = 1) => {
+        doc.setDrawColor(violet[0], violet[1], violet[2]);
+        doc.setLineWidth(1.5 * scale);
+        doc.circle(x, y, 10 * scale);
+        
+        // Bars
+        doc.setFillColor(teal[0], teal[1], teal[2]);
+        doc.rect(x - 6 * scale, y + 2 * scale, 1.5 * scale, -4 * scale, 'F');
+        doc.rect(x - 3 * scale, y + 2 * scale, 1.5 * scale, -7 * scale, 'F');
+        doc.rect(x + 0 * scale, y + 2 * scale, 1.5 * scale, -9 * scale, 'F');
+        doc.rect(x + 3 * scale, y + 2 * scale, 1.5 * scale, -5 * scale, 'F');
+        
+        // Handle (A shape)
+        doc.setLineWidth(3 * scale);
+        doc.line(x + 8 * scale, y + 8 * scale, x + 15 * scale, y + 15 * scale);
       };
-
-      const logoData = await getBase64Image(logoUrl);
 
       // --- HEADER (Dark Branding) ---
       doc.setFillColor(10, 10, 10);
       doc.rect(0, 0, 210, 50, 'F');
       
-      // Branding: DIGITAL MATTER.
+      // Branding: AuditGuru
+      drawLogo(doc, 25, 25, 1.2);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
       doc.setTextColor(255, 255, 255);
-      doc.text("DIGITAL", 20, 25);
-      
-      const digitalWidth = doc.getTextWidth("DIGITAL ");
-      doc.setTextColor(lime[0], lime[1], lime[2]);
-      doc.text("MATTER.", 20 + digitalWidth, 25);
+      doc.text("Audit", 45, 28);
+      const auditWidth = doc.getTextWidth("Audit");
+      doc.setTextColor(violet[0], violet[1], violet[2]);
+      doc.text("Guru", 45 + auditWidth, 28);
 
-      // Tagline: D I G I T A L L Y   Y O U R S
-      doc.setFont("courier", "bold");
+      // Tagline
       doc.setFontSize(7);
       doc.setTextColor(140, 140, 140);
-      // Roughly align S below R of MATTER
-      doc.text("D I G I T A L L Y   Y O U R S", 20, 32);
+      doc.text("FIND ISSUES. FIX CONVERSIONS. GROW REVENUE.", 45, 34);
 
-      doc.setTextColor(lime[0], lime[1], lime[2]);
-      doc.setFontSize(22);
+      doc.setTextColor(violet[0], violet[1], violet[2]);
+      doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text("CRO AUDIT REPORT", 200, 24, { align: 'right' });
+      doc.text("CRO AUDIT REPORT", 200, 28, { align: 'right' });
       
       doc.setTextColor(180, 180, 180);
       doc.setFontSize(8);
@@ -401,15 +401,9 @@ export default function App() {
       const pagesCount = (doc as any).internal.getNumberOfPages();
       for (let i = 1; i <= pagesCount; i++) {
         doc.setPage(i);
-        if (logoData) {
-          (doc as any).saveGraphicsState();
-          (doc as any).setGState(new (doc as any).GState({ opacity: 0.12 }));
-          doc.addImage(logoData, 'PNG', 45, 90, 120, 120);
-          (doc as any).restoreGraphicsState();
-        }
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
-        doc.text("THE DIGITAL MATTER | GROWTH SYSTEMS & PERFORMANCE LAB", 105, 285, { align: 'center' });
+        doc.text("AUDIT GURU | STRATEGIC GROWTH SYSTEMS & PERFORMANCE LAB", 105, 285, { align: 'center' });
         doc.text(`Page ${i}/${pagesCount}`, 195, 285, { align: 'right' });
       }
 
@@ -513,9 +507,7 @@ export default function App() {
       <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-50">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-indigo-500/20">
-              <img src="https://storage.googleapis.com/bit_app_artifacts/AuditGuru/logo.png" alt="AuditGuru Logo" className="w-full h-full object-cover" />
-            </div>
+            <Logo showText={false} size="sm" />
             <span className="font-ex-bold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">AuditGuru</span>
           </div>
 
