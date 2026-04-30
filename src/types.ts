@@ -1,17 +1,30 @@
 export interface AuditResult {
   score: number;
-  estimatedRevenueLoss: number;
+  status: "Needs Improvement" | "Critical" | "Strong";
+  estimatedMonthlyRevenueLoss: number;
+  estimatedYearlyRevenueLoss: number;
+  revenueImpactStatement: string;
   executiveAnalysis: string;
+  executiveSummaryBullets: string[];
   topIssues: {
     title: string;
     impact: "High" | "Medium" | "Low";
     description: string;
-    fix: string; // The "AI Recommended Fix"
+    fix: string;
     whyItMatters: string;
     potentialImpactText: string;
   }[];
   quickWins: string[];
   strategicRecommendations: string[];
+  emailTemplate: {
+    subject: string;
+    body: string;
+  };
+  nextStepsCTA: {
+    headline: string;
+    body: string;
+    buttonText: string;
+  };
   performanceMetrics: {
     messaging: number;
     trust: number;

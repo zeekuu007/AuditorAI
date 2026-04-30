@@ -32,25 +32,40 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
   const prompt = `Analyze this website: ${url} (Industry: ${industry})
     Scraped Data Context: ${JSON.stringify(scrapedData, null, 2)}
     
-    Objective: Deliver a high-value CRO Audit.
+    Objective: Generate a high-converting CRO audit report designed to create urgency and highlight revenue loss.
+    
+    Tone: Direct, slightly aggressive, business-focused, professional but sharp.
     
     REQUIRED JSON OUTPUT:
     {
       "score": number (45-85),
-      "estimatedRevenueLoss": number,
-      "executiveAnalysis": "string",
+      "status": "Needs Improvement" | "Critical" | "Strong",
+      "estimatedMonthlyRevenueLoss": number (Maximum 15000),
+      "estimatedYearlyRevenueLoss": number,
+      "revenueImpactStatement": "string (e.g., 'This is revenue currently being lost due to avoidable conversion issues.')",
+      "executiveAnalysis": "string (Brief context)",
+      "executiveSummaryBullets": ["string (4-6 bullets: what's broken, why it matters, impact)"],
       "topIssues": [
         {
-          "title": "string",
+          "title": "string (clear and specific)",
           "impact": "High" | "Medium" | "Low",
-          "description": "string",
-          "fix": "string",
+          "description": "string (what this is costing)",
+          "fix": "string (recommended fix)",
           "whyItMatters": "string",
           "potentialImpactText": "string"
         }
       ],
-      "quickWins": ["string"],
+      "quickWins": ["string (3-5 quick high-impact fixes)"],
       "strategicRecommendations": ["string"],
+      "emailTemplate": {
+        "subject": "string",
+        "body": "string"
+      },
+      "nextStepsCTA": {
+        "headline": "string (Strong, slightly confrontational)",
+        "body": "string (Reinforce loss, position call as solution, add urgency)",
+        "buttonText": "Book a 30-minute strategy call"
+      },
       "performanceMetrics": {
         "messaging": number,
         "trust": number,
@@ -58,7 +73,12 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
         "ux": number,
         "conversion": number
       }
-    }`;
+    }
+    
+    Ensure exactly 5 distinct top issues are provided in the "topIssues" array.
+    Ensure executiveSummaryBullets has 4-6 bullet points.
+    Ensure quickWins has 3-5 items.
+    The emailTemplate should be written as if a senior Customer Support or Strategy Lead is reaching out to the customer. It should be catchy, very human-written, and directly reference the audit findings. Use a warm but expert tone.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -66,13 +86,17 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: "You are a world-class CRO (Conversion Rate Optimization) Specialist. You provide sharp, data-driven, and slightly critical audits that focus on revenue recovery.",
+        systemInstruction: "You are a CRO expert, direct-response copywriter, and conversion strategist. You write sharp, personalized teardowns that make business owners uncomfortable enough to take action. Focus heavily on money impact and revenue loss.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             score: { type: Type.NUMBER },
-            estimatedRevenueLoss: { type: Type.NUMBER },
+            status: { type: Type.STRING },
+            estimatedMonthlyRevenueLoss: { type: Type.NUMBER },
+            estimatedYearlyRevenueLoss: { type: Type.NUMBER },
+            revenueImpactStatement: { type: Type.STRING },
             executiveAnalysis: { type: Type.STRING },
+            executiveSummaryBullets: { type: Type.ARRAY, items: { type: Type.STRING } },
             topIssues: {
               type: Type.ARRAY,
               items: {
@@ -90,6 +114,23 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
             },
             quickWins: { type: Type.ARRAY, items: { type: Type.STRING } },
             strategicRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
+            emailTemplate: {
+              type: Type.OBJECT,
+              properties: {
+                subject: { type: Type.STRING },
+                body: { type: Type.STRING }
+              },
+              required: ["subject", "body"]
+            },
+            nextStepsCTA: {
+              type: Type.OBJECT,
+              properties: {
+                headline: { type: Type.STRING },
+                body: { type: Type.STRING },
+                buttonText: { type: Type.STRING }
+              },
+              required: ["headline", "body", "buttonText"]
+            },
             performanceMetrics: {
               type: Type.OBJECT,
               properties: {
@@ -102,7 +143,7 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
               required: ["messaging", "trust", "performance", "ux", "conversion"]
             }
           },
-          required: ["score", "estimatedRevenueLoss", "executiveAnalysis", "topIssues", "quickWins", "strategicRecommendations", "performanceMetrics"]
+          required: ["score", "status", "estimatedMonthlyRevenueLoss", "estimatedYearlyRevenueLoss", "revenueImpactStatement", "executiveAnalysis", "executiveSummaryBullets", "topIssues", "quickWins", "strategicRecommendations", "emailTemplate", "nextStepsCTA", "performanceMetrics"]
         }
       }
     });

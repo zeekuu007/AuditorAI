@@ -53,8 +53,17 @@ const INITIAL_REPORTS: AuditReport[] = [
     status: "Completed",
     result: {
       score: 62,
-      estimatedRevenueLoss: 4200,
+      status: "Needs Improvement",
+      estimatedMonthlyRevenueLoss: 4200,
+      estimatedYearlyRevenueLoss: 50400,
+      revenueImpactStatement: "This is revenue currently being lost due to avoidable conversion issues.",
       executiveAnalysis: "The site has strong messaging but fails to convert due to excessive form friction and lack of clear CTA hierarchy.",
+      executiveSummaryBullets: [
+        "High friction signup process",
+        "Lack of trust signals near conversion points",
+        "Undefined value proposition on mobile",
+        "Slow first contentful paint"
+      ],
       topIssues: [
         {
           title: "High Form Friction",
@@ -98,7 +107,16 @@ const INITIAL_REPORTS: AuditReport[] = [
         }
       ],
       quickWins: ["Add trust badges", "Shorten footer", "Fix mobile padding"],
-      strategicRecommendations: ["Refocus target audience", "Simplify pricing", "Add demo video"],
+      strategicRecommendations: ["Simplify pricing"],
+      emailTemplate: {
+        subject: "Quick question about example.com's checkout flow",
+        body: "Hi there,\n\nI was just reviewing example.com and noticed a few things that might be costing you sales—specifically around the friction in your signup process.\n\nWe ran a quick audit and found that reducing your form fields could likely bump your conversion rate by 15% almost instantly.\n\nWould you be open to a quick 10-minute chat about how to fix this?\n\nBest,\nZeerak"
+      },
+      nextStepsCTA: {
+        headline: "Stop the Revenue Leakage Today",
+        body: "We've identified $50k in annual lost revenue. Let's build a plan to recover it.",
+        buttonText: "Book Strategy Call"
+      },
       performanceMetrics: { messaging: 7, trust: 5, performance: 8, ux: 6, conversion: 5 }
     }
   },
@@ -111,8 +129,17 @@ const INITIAL_REPORTS: AuditReport[] = [
     status: "Completed",
     result: {
       score: 96,
-      estimatedRevenueLoss: 450,
-      executiveAnalysis: "Outstanding conversion architecture. The site leverages social proof and clear urgency markers effectively. Only minor technical debt remains.",
+      status: "Strong",
+      estimatedMonthlyRevenueLoss: 450,
+      estimatedYearlyRevenueLoss: 5400,
+      revenueImpactStatement: "Minor technical debt is the only thing standing between you and peak performance.",
+      executiveAnalysis: "Outstanding conversion architecture. The site leverages social proof and clear urgency markers effectively.",
+      executiveSummaryBullets: [
+        "Highly optimized checkout flow",
+        "Strong brand storytelling",
+        "Efficient mobile performance",
+        "Effective social proof integration"
+      ],
       topIssues: [
         {
           title: "Micro-copy Clarity",
@@ -157,6 +184,15 @@ const INITIAL_REPORTS: AuditReport[] = [
       ],
       quickWins: ["Update meta descriptions", "Add favicon"],
       strategicRecommendations: ["Loyalty program implementation"],
+      emailTemplate: {
+        subject: "Love what you've done with wellness-cat.com",
+        body: "Hi Team,\n\nI'm a senior strategist here at AuditGuru. I just ran a teardown of wellness-cat.com and, honestly, it's one of the best optimized sites I've seen this month.\n\nThere are just 2 micro-frictions I found that could squeeze out an extra 5% in sales with almost zero effort (mostly around abandoned cart reminders).\n\nMind if I send over the specifics?\n\nCheers,\nZeerak"
+      },
+      nextStepsCTA: {
+        headline: "Scale Your Growth Further",
+        body: "You're doing great, but there's still room to squeeze out more performance.",
+        buttonText: "Consult with an Expert"
+      },
       performanceMetrics: { messaging: 9, trust: 9, performance: 9, ux: 10, conversion: 9 }
     }
   },
@@ -169,8 +205,17 @@ const INITIAL_REPORTS: AuditReport[] = [
     status: "Completed",
     result: {
       score: 45,
-      estimatedRevenueLoss: 8500,
-      executiveAnalysis: "Critical issues detected. The site lacks a secure connection and fundamental SEO metadata, leading to high bounce rates and massive trust deficits in the eyes of visitors.",
+      status: "Critical",
+      estimatedMonthlyRevenueLoss: 8500,
+      estimatedYearlyRevenueLoss: 102000,
+      revenueImpactStatement: "Critical trust deficits are causing a massive leakage of potential leads.",
+      executiveAnalysis: "Critical issues detected. The site lacks basic security markers and fundamental SEO structures.",
+      executiveSummaryBullets: [
+        "Security threat (Missing SSL)",
+        "Severe page weight issues",
+        "Friction-heavy checkout",
+        "No clear CTA hierarchy"
+      ],
       topIssues: [
         {
           title: "Missing SSL Certificate",
@@ -191,7 +236,7 @@ const INITIAL_REPORTS: AuditReport[] = [
         {
           title: "Complex Checkout Flow",
           impact: "High",
-          description: "The multi-step process for a simple service leads to high drop-off rates.",
+          description: "The multi-step process for a simple service leads to high drop-offs.",
           fix: "Simplify to a single-page checkout process.",
           whyItMatters: "Every additional field is an opportunity for the user to leave.",
           potentialImpactText: "+20% Sales"
@@ -199,7 +244,7 @@ const INITIAL_REPORTS: AuditReport[] = [
         {
           title: "Hidden Contact Information",
           impact: "Medium",
-          description: "Users have to scroll through multiple pages to find a way to get help.",
+          description: "Users have to scroll through multiple pages to find help.",
           fix: "Place a 'Contact Us' link prominently in the header and footer.",
           whyItMatters: "Accessibility builds reliability and perceived support quality.",
           potentialImpactText: "+8% Leads"
@@ -207,14 +252,23 @@ const INITIAL_REPORTS: AuditReport[] = [
         {
           title: "No Value Proposition",
           impact: "High",
-          description: "The headline is generic and doesn't explain what the agency does differently.",
-          fix: "Rewrite the hero section to focus on the unique value provided to clients.",
+          description: "Headline is generic and doesn't explain unique value.",
+          fix: "Rewrite hero section to focus on unique value provided.",
           whyItMatters: "Clarity in the first 3 seconds is vital for retention.",
           potentialImpactText: "+15% Engagement"
         }
       ],
       quickWins: ["Set up SSL", "Add meta titles", "Compress main image"],
-      strategicRecommendations: ["Full site speed optimization", "Rebranding strategy"],
+      strategicRecommendations: ["Full site relaunch"],
+      emailTemplate: {
+        subject: "Urgent: Security and Conversion issues on brand.io",
+        body: "Hi,\n\nI'm reaching out because I just ran a technical audit on brand.io and found some critical issues—most notably the missing SSL certificate which is likely scaring away 40% of your traffic before they even see your offer.\n\nI've mapped out a plan to fix this and recover the ~$8,500/month in lost revenue we estimated.\n\nCan we jump on a brief call tomorrow to discuss?\n\nBest,\nZeerak"
+      },
+      nextStepsCTA: {
+        headline: "URGENT: Your Site is Bleeding Cash",
+        body: "We found over $100k in yearly revenue loss. This needs immediate attention.",
+        buttonText: "Emergency Strategy Call"
+      },
       performanceMetrics: { messaging: 4, trust: 2, performance: 3, ux: 5, conversion: 3 }
     }
   },
@@ -236,6 +290,13 @@ export default function App() {
   const [selectedIssue, setSelectedIssue] = useState<number | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark based on logo vibe
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
+  };
 
   useEffect(() => {
     if (isDarkMode) {
@@ -299,6 +360,12 @@ export default function App() {
       doc.setTextColor(140, 140, 140);
       doc.text("FIND ISSUES. FIX CONVERSIONS. GROW REVENUE.", 45, 34);
 
+      // Branding: A Product of The Digital Matter
+      doc.setFont("helvetica", "bolditalic");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.text("A Product of The Digital Matter", 45, 39);
+
       doc.setTextColor(violet[0], violet[1], violet[2]);
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
@@ -310,94 +377,206 @@ export default function App() {
       doc.text(`Prepared for: ${auditUrl.toUpperCase()}`, 200, 34, { align: 'right' });
       doc.text(`DATE Created: ${report?.date || new Date().toLocaleDateString()}`, 200, 40, { align: 'right' });
 
-      // --- BODY (White) ---
+      // --- BODY ---
       let currentY = 65;
 
+      // 🚨 HEADLINE SECTION
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(220, 38, 38);
+      const monthlyLoss = auditData.estimatedMonthlyRevenueLoss || 0;
+      doc.text(`"You Are Losing ~$${monthlyLoss.toLocaleString()}/Month in Revenue"`, 20, currentY);
+      
+      currentY += 10;
+      doc.setFontSize(11);
+      doc.setTextColor(51, 65, 85);
+      doc.setFont("helvetica", "normal");
+      doc.text("We analyzed your website and found multiple conversion leaks that are actively reducing your sales every day.", 20, currentY, { align: 'justify', maxWidth: 170 });
+
+      currentY += 15;
+      
+      // Score Box
+      // Score Box & Status Section
       const scScore = auditData.score || 0;
       let scColor: [number, number, number] = [220, 38, 38]; 
       if (scScore >= 95) scColor = [16, 185, 129];
       else if (scScore >= 60) scColor = [245, 158, 11];
       
+      // Right-aligned Score Circle
       doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
       doc.setLineWidth(2.5);
-      doc.circle(170, currentY + 12, 18);
+      const circleCenterY = currentY + 12;
+      doc.circle(178, circleCenterY, 18);
+      
+      doc.setTextColor(scColor[0], scColor[1], scColor[2]);
+      doc.setFont("helvetica", "bold");
+      
+      // Vertical centering math (approximate for helvetica)
+      doc.setFontSize(28);
+      doc.text(`${scScore}`, 178, circleCenterY + 4, { align: 'center' }); 
+      
+      doc.setFontSize(7);
+      doc.text("OVERALL", 178, circleCenterY + 9, { align: 'center' });
+      doc.text("SCORE", 178, circleCenterY + 12, { align: 'center' });
+
+      // Left-aligned Status Text
       doc.setFontSize(22);
       doc.setTextColor(scColor[0], scColor[1], scColor[2]);
-      doc.text(`${scScore}`, 170, currentY + 14, { align: 'center' });
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.text("SCORE", 170, currentY + 20, { align: 'center' });
+      doc.text(`STATUS: ${auditData.status?.toUpperCase() || 'NEEDS IMPROVEMENT'}`, 20, circleCenterY + 4);
 
-      doc.setTextColor(15, 23, 42);
-      doc.setFontSize(15);
-      doc.setFont("helvetica", "bold");
-      doc.text("EXECUTIVE ANALYSIS", 20, currentY + 8);
-      
-      doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
-      doc.setLineWidth(1.5);
-      doc.line(20, currentY + 11, 45, currentY + 11);
+      currentY += 40;
 
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(51, 65, 85);
-      const analysisLines = doc.splitTextToSize(auditData.executiveAnalysis || "No analysis available.", 125);
-      doc.text(analysisLines, 20, currentY + 22, { align: 'justify', maxWidth: 125 });
-
-      // Spacing fix for revenue loss box
-      currentY += Math.max(55, (analysisLines.length * 5) + 30);
-
-      doc.setLineWidth(1.5);
-      doc.setFillColor(254, 242, 242);
-      doc.setDrawColor(252, 165, 165);
-      doc.roundedRect(20, currentY, 170, 30, 4, 4, 'FD');
-      doc.setTextColor(220, 38, 38);
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text("ESTIMATED MONTHLY REVENUE LOSS", 105, currentY + 10, { align: 'center' });
-      doc.setFontSize(22);
-      doc.text(`$${(auditData.estimatedRevenueLoss || 0).toLocaleString()}`, 105, currentY + 22, { align: 'center' });
-
-      currentY += 45;
-
+      // ⚡ EXECUTIVE SUMMARY
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("TOP CONVERSION HURDLES", 20, currentY);
+      doc.text("EXECUTIVE SUMMARY", 20, currentY);
+      doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
+      doc.setLineWidth(1);
+      doc.line(20, currentY + 2, 45, currentY + 2);
+
+      currentY += 12;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      const summaryBullets = auditData.executiveSummaryBullets || [];
+      summaryBullets.forEach((bullet) => {
+        const lines = doc.splitTextToSize(`• ${bullet}`, 170);
+        doc.text(lines, 20, currentY, { align: 'justify', maxWidth: 170 });
+        currentY += (lines.length * 5) + 3;
+      });
+
+      currentY += 10;
+
+      // 💰 REVENUE IMPACT SECTION
+      doc.setFillColor(254, 242, 242);
+      doc.setDrawColor(252, 165, 165);
+      doc.roundedRect(20, currentY, 170, 48, 4, 4, 'FD');
+      
+      doc.setTextColor(220, 38, 38);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("REVENUE IMPACT", 30, currentY + 12);
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Estimated Monthly Loss: $${monthlyLoss.toLocaleString()}`, 30, currentY + 22);
+      const yearlyLoss = auditData.estimatedYearlyRevenueLoss || (monthlyLoss * 12);
+      doc.text(`Estimated Yearly Loss: $${yearlyLoss.toLocaleString()}`, 30, currentY + 30);
+      
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.text(`"${auditData.revenueImpactStatement || "This is revenue currently being lost due to avoidable conversion issues."}"`, 30, currentY + 40, { align: 'justify', maxWidth: 155 });
+
+      // FORCE PAGE BREAK FOR TABLE HEADING
+      doc.addPage();
+      currentY = 25;
+
+      // 🔍 TOP CONVERSION ISSUES (TABLE)
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("POTENTIAL REVENUE RECOVERY AREAS", 20, currentY);
+      doc.setDrawColor(violet[0], violet[1], violet[2]);
+      doc.setLineWidth(1);
+      doc.line(20, currentY + 2, 80, currentY + 2);
       
       autoTable(doc, {
-        startY: currentY + 6,
-        head: [['ISSUE', 'IMPACT', 'RECOMMENDED FIX']],
-        body: auditData.topIssues.map(issue => [issue.title.toUpperCase(), issue.impact, issue.fix]),
+        startY: currentY + 10,
+        head: [['ISSUE / REASON', 'IMPACT', 'RECOMMENDED FIX']],
+        body: auditData.topIssues.map(issue => [
+          issue.title.toUpperCase(),
+          issue.impact.toUpperCase(),
+          issue.fix
+        ]),
         theme: 'striped',
-        headStyles: { fillColor: slateDark, textColor: [255, 255, 255], fontStyle: 'bold' },
-        styles: { fontSize: 9, cellPadding: 5 },
+        headStyles: { 
+          fillColor: [30, 41, 59], 
+          textColor: [255, 255, 255], 
+          fontStyle: 'bold',
+          fontSize: 9
+        },
+        styles: { 
+          fontSize: 8.5, 
+          cellPadding: 4,
+          valign: 'middle'
+        },
         columnStyles: { 
-          0: { cellWidth: 60, fontStyle: 'bold', fontSize: 8.5 }, 
+          0: { cellWidth: 55, fontStyle: 'bold' }, 
           1: { cellWidth: 25, halign: 'center' }, 
-          2: { cellWidth: 85 } 
+          2: { cellWidth: 90, halign: 'justify' } 
         },
         didParseCell: (data: any) => {
           if (data.section === 'body' && data.column.index === 1) {
             const val = data.cell.raw;
-            if (val === 'High') data.cell.styles.textColor = [220, 38, 38];
-            else if (val === 'Medium') data.cell.styles.textColor = [249, 115, 22]; // Orange
-            else if (val === 'Low') data.cell.styles.textColor = [234, 179, 8]; // Yellow
+            if (val === 'HIGH') data.cell.styles.textColor = [220, 38, 38];
+            else if (val === 'MEDIUM') data.cell.styles.textColor = [249, 115, 22];
+            else data.cell.styles.textColor = [234, 179, 8];
           }
         }
       });
 
-      const afterTableY = (doc as any).lastAutoTable.finalY + 15;
+      currentY = (doc as any).lastAutoTable.finalY + 15;
+
+      // ⚡ QUICK WINS SECTION
+      if (currentY > 230) {
+        doc.addPage();
+        currentY = 25;
+      }
+
       doc.setTextColor(15, 23, 42);
-      doc.setFontSize(13);
+      doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("NEXT STEPS: STOP THE REVENUE LEAKS", 20, afterTableY);
+      doc.text("QUICK WINS (IMPLEMENT IMMEDIATELY)", 20, currentY);
+      doc.setDrawColor(teal[0], teal[1], teal[2]);
+      doc.line(20, currentY + 2, 80, currentY + 2);
+
+      currentY += 12;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      const quickWins = auditData.quickWins || [];
+      quickWins.forEach((win) => {
+        // Remove special characters that might render as gibberish
+        const sanitizedWin = win.replace(/[^\x00-\x7F]/g, "").replace(/&+/g, "*");
+        const lines = doc.splitTextToSize(`• ${sanitizedWin}`, 165);
+        doc.text(lines, 25, currentY);
+        currentY += (lines.length * 6);
+      });
+      doc.setFont("helvetica", "bold");
+      doc.text("These changes alone can increase conversions by 10–25%.", 20, currentY + 4);
+
+      currentY += 25;
+
+      // 🚀 NEXT STEPS (CTA)
+      if (currentY > 220) {
+        doc.addPage();
+        currentY = 25;
+      }
+
+      doc.setFillColor(slateDark[0], slateDark[1], slateDark[2]);
+      doc.roundedRect(20, currentY, 170, 55, 4, 4, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(auditData.nextStepsCTA?.headline || "NEXT STEPS: STOP THE REVENUE LEAKS", 30, currentY + 12);
       
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(51, 65, 85);
-      const closing = "Let's dive deeper into these results and build a concrete game plan to plug your revenue leaks. Schedule a quick 30-minute Strategy Call with our team to recover your lost conversions today.";
-      const closingLines = doc.splitTextToSize(closing, 170);
-      doc.text(closingLines, 20, afterTableY + 10);
+      doc.setTextColor(200, 200, 200);
+      const ctaBodyLines = doc.splitTextToSize(auditData.nextStepsCTA?.body || "We’ve identified exactly where you're losing revenue. Now the question is — do you want to keep losing it?", 150);
+      doc.text(ctaBodyLines, 30, currentY + 22, { align: 'justify', maxWidth: 150 });
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bolditalic");
+      const ctaText = `${auditData.nextStepsCTA?.buttonText || "Book a 30-minute strategy call"} →`;
+      doc.text(ctaText, 30, currentY + 45);
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.5);
+      doc.line(30, currentY + 47, 30 + (doc.getTextWidth(ctaText) * 0.95), currentY + 47);
+
 
       const pagesCount = (doc as any).internal.getNumberOfPages();
       for (let i = 1; i <= pagesCount; i++) {
@@ -474,7 +653,13 @@ export default function App() {
         score: result.score,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         status: (user.auditsRemaining > 0 || user.plan === "Pro") ? "Completed" : "Locked",
-        result
+        result: {
+          ...result,
+          score: result.score,
+          status: result.status || "Needs Improvement",
+          estimatedMonthlyRevenueLoss: result.estimatedMonthlyRevenueLoss || 0,
+          estimatedYearlyRevenueLoss: result.estimatedYearlyRevenueLoss || 0
+        } as AuditResult
       };
       
       setReports(prev => [newReport, ...prev]);
@@ -779,7 +964,7 @@ export default function App() {
                     <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Estimated Revenue Loss</span>
                     <Lock className="w-3 h-3 text-slate-300 dark:text-slate-600" />
                   </div>
-                  <div className="text-5xl font-bold mb-2 text-slate-900 dark:text-slate-100">${currentAudit.estimatedRevenueLoss.toLocaleString()}</div>
+                  <div className="text-5xl font-bold mb-2 text-slate-900 dark:text-slate-100">${(currentAudit.estimatedMonthlyRevenueLoss || 0).toLocaleString()}</div>
                   <div className="text-sm font-bold text-red-500 mb-6 uppercase tracking-widest">Per Month</div>
                   <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                     Fix the issues in this report to recover lost revenue.
@@ -816,6 +1001,42 @@ export default function App() {
                    </div>
                 </div>
                 <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">1 free audit remaining</span>
+              </div>
+
+              {/* Email Template Tool */}
+              <div className="mt-12 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                       <Mail className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Email Outreach Template</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Generated by AuditGuru Strategy Team</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => copyToClipboard(currentAudit.emailTemplate.body)}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white dark:text-indigo-400 rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-indigo-600 dark:hover:text-white transition-all shadow-sm"
+                  >
+                    {copiedEmail ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedEmail ? "Copied!" : "Copy Email"}
+                  </button>
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Subject Line</span>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 text-sm font-bold">
+                       {currentAudit.emailTemplate.subject}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Email Body</span>
+                    <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 text-sm leading-relaxed whitespace-pre-wrap font-medium text-slate-600 dark:text-slate-400">
+                       {currentAudit.emailTemplate.body}
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
