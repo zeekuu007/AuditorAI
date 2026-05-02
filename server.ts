@@ -23,11 +23,24 @@ app.post("/api/scrape", async (req, res) => {
     const targetUrl = url.startsWith("http") ? url : `https://${url}`;
     const response = await axios.get(targetUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Referer": "https://www.google.com/",
       },
-      timeout: 10000,
-      validateStatus: () => true, // Accept any status code to handle errors gracefully
+      timeout: 15000,
+      validateStatus: () => true, 
     });
+
+    if (response.status === 403 || response.status === 401) {
+      return res.status(response.status).json({ 
+        error: `Website (HTML) is blocked by security (Status ${response.status}). Most likely due to anti-bot measures like Cloudflare.`,
+        isBlocked: true 
+      });
+    }
 
     if (response.status >= 400) {
       return res.status(response.status).json({ error: `Website returned status ${response.status}` });

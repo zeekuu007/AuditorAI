@@ -28,6 +28,10 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
 
   const scrapedData = await scrapeResponse.json();
 
+  if (scrapedData.isBlocked) {
+    throw new Error(`The target website (${url}) is blocking automated access. For a deep audit, we need access to the site's structure. Please try a different URL or ensure the site allows scraping.`);
+  }
+
   // Step 2: Generate audit with Gemini
   const prompt = `Analyze this website: ${url} (Industry: ${industry})
     Scraped Data Context: ${JSON.stringify(scrapedData, null, 2)}
