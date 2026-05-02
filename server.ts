@@ -23,21 +23,25 @@ app.post("/api/scrape", async (req, res) => {
     const targetUrl = url.startsWith("http") ? url : `https://${url}`;
     const response = await axios.get(targetUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
         "Cache-Control": "no-cache",
         "Pragma": "no-cache",
-        "Referer": "https://www.google.com/",
       },
-      timeout: 15000,
+      timeout: 10000,
       validateStatus: () => true, 
+      responseType: 'text',
+      maxContentLength: 10 * 1024 * 1024, // 10MB limit
     });
 
-    if (response.status === 403 || response.status === 401) {
+    if (!response.data || typeof response.data !== 'string') {
+       throw new Error("Target website returned empty or invalid content.");
+    }
+
+    if (response.status === 403 || response.status === 401 || response.status === 429) {
       return res.status(response.status).json({ 
-        error: `Website (HTML) is blocked by security (Status ${response.status}). Most likely due to anti-bot measures like Cloudflare.`,
+        error: `Website is protected by security measures (Status ${response.status}). Bot-blocking might be active at ${targetUrl}.`,
         isBlocked: true 
       });
     }

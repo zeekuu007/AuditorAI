@@ -16,12 +16,12 @@ export async function generateAudit(url: string, industry: string): Promise<Audi
   });
 
   if (!scrapeResponse.ok) {
-    let errorMsg = "Failed to analyze website structure.";
+    let errorMsg = "Could not reach target website or check structure.";
     try {
       const errorData = await scrapeResponse.json();
       errorMsg = errorData.error || errorMsg;
     } catch (e) {
-      // Fallback
+      errorMsg = `Server Error (${scrapeResponse.status}): The audit engine encountered an connectivity issue.`;
     }
     throw new Error(errorMsg);
   }

@@ -346,36 +346,37 @@ export default function App() {
       doc.rect(0, 0, 210, 50, 'F');
       
       // Branding: AuditGuru
-      drawLogo(doc, 25, 25, 1.2);
+      drawLogo(doc, 25, 23, 1.2);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
       doc.setTextColor(255, 255, 255);
-      doc.text("Audit", 45, 28);
+      doc.text("Audit", 45, 27);
       const auditWidth = doc.getTextWidth("Audit");
       doc.setTextColor(violet[0], violet[1], violet[2]);
-      doc.text("Guru", 45 + auditWidth, 28);
+      doc.text("Guru", 45 + auditWidth, 27);
 
       // Tagline
-      doc.setFontSize(7);
-      doc.setTextColor(140, 140, 140);
-      doc.text("FIND ISSUES. FIX CONVERSIONS. GROW REVENUE.", 45, 34);
+      doc.setFontSize(7.5);
+      doc.setTextColor(180, 180, 180);
+      doc.setFont("helvetica", "bold");
+      doc.text("FIND ISSUES. FIX CONVERSIONS. GROW REVENUE.", 45, 33);
 
       // Branding: A Product of The Digital Matter
-      doc.setFont("helvetica", "bolditalic");
-      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "italic");
+      doc.setTextColor(150, 150, 150);
       doc.setFontSize(8);
-      doc.text("A Product of The Digital Matter", 45, 39);
+      doc.text("Analysis powered by The Digital Matter Engine", 45, 38);
 
-      doc.setTextColor(violet[0], violet[1], violet[2]);
+      doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text("CRO AUDIT REPORT", 200, 28, { align: 'right' });
+      doc.text("CRO AUDIT REPORT", 190, 27, { align: 'right' });
       
       doc.setTextColor(180, 180, 180);
-      doc.setFontSize(8);
+      doc.setFontSize(8.5);
       doc.setFont("helvetica", "normal");
-      doc.text(`Prepared for: ${auditUrl.toUpperCase()}`, 200, 34, { align: 'right' });
-      doc.text(`DATE Created: ${report?.date || new Date().toLocaleDateString()}`, 200, 40, { align: 'right' });
+      doc.text(`PREPARED FOR: ${auditUrl.toUpperCase()}`, 190, 33, { align: 'right' });
+      doc.text(`DATE: ${report?.date || new Date().toLocaleDateString()}`, 190, 38, { align: 'right' });
 
       // --- BODY ---
       let currentY = 65;
@@ -405,24 +406,25 @@ export default function App() {
       // Right-aligned Score Circle
       doc.setDrawColor(scColor[0], scColor[1], scColor[2]);
       doc.setLineWidth(2.5);
+      const circleCenterX = 178;
       const circleCenterY = currentY + 12;
-      doc.circle(178, circleCenterY, 18);
+      doc.circle(circleCenterX, circleCenterY, 18);
       
       doc.setTextColor(scColor[0], scColor[1], scColor[2]);
       doc.setFont("helvetica", "bold");
       
-      // Vertical centering math (approximate for helvetica)
-      doc.setFontSize(28);
-      doc.text(`${scScore}`, 178, circleCenterY + 4, { align: 'center' }); 
+      // Precision centering for score and labels
+      doc.setFontSize(26);
+      doc.text(`${scScore}`, circleCenterX, circleCenterY + 1, { align: 'center' }); 
       
       doc.setFontSize(7);
-      doc.text("OVERALL", 178, circleCenterY + 9, { align: 'center' });
-      doc.text("SCORE", 178, circleCenterY + 12, { align: 'center' });
+      doc.text("OVERALL", circleCenterX, circleCenterY + 7, { align: 'center' });
+      doc.text("SCORE", circleCenterX, circleCenterY + 10, { align: 'center' });
 
       // Left-aligned Status Text
-      doc.setFontSize(22);
+      doc.setFontSize(20);
       doc.setTextColor(scColor[0], scColor[1], scColor[2]);
-      doc.text(`STATUS: ${auditData.status?.toUpperCase() || 'NEEDS IMPROVEMENT'}`, 20, circleCenterY + 4);
+      doc.text(`STATUS: ${auditData.status?.toUpperCase() || 'NEEDS IMPROVEMENT'}`, 20, circleCenterY + 3);
 
       currentY += 40;
 
@@ -537,8 +539,13 @@ export default function App() {
       doc.setTextColor(51, 65, 85);
       const quickWins = auditData.quickWins || [];
       quickWins.forEach((win) => {
-        // Remove special characters that might render as gibberish
-        const sanitizedWin = win.replace(/[^\x00-\x7F]/g, "").replace(/&+/g, "*");
+        // Remove special characters and formatting junk that might render as gibberish
+        const sanitizedWin = win
+          .replace(/[^\x20-\x7E]/g, "") // Keep only printable ASCII
+          .replace(/&+/g, "and")
+          .replace(/\*/g, "")
+          .trim();
+        
         const lines = doc.splitTextToSize(`• ${sanitizedWin}`, 165);
         doc.text(lines, 25, currentY);
         currentY += (lines.length * 6);
