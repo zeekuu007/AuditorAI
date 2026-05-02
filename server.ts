@@ -70,8 +70,24 @@ app.post("/api/scrape", async (req, res) => {
 
     res.json({ url: targetUrl, title, description: metaDescription, h1s, h2s, ctas, bodyText });
   } catch (error: any) {
-    console.error("Internal Scrape Error:", error.message);
-    res.status(500).json({ error: `Scraping failed: ${error.message}` });
+    let statusCode = 500;
+    let message = error.message;
+
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        statusCode = 504;
+        message = "The website took too long to respond. It might be down or blocking us.";
+      } else if (error.code === 'ENOTFOUND') {
+        statusCode = 404;
+        message = "Could not find the website. Make sure the URL is correct.";
+      } else if (error.response) {
+        statusCode = error.response.status;
+        message = `Website returned an error: ${error.response.statusText}`;
+      }
+    }
+
+    console.error("Internal Scrape Error:", message);
+    res.status(statusCode).json({ error: message });
   }
 });
 

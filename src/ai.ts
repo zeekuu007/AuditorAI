@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || ""
 });
 
-const MODEL_NAME = "gemini-3-flash-preview";
+const MODEL_NAME = "gemini-1.5-flash";
 
 export async function generateAudit(url: string, industry: string): Promise<AuditResult> {
   // Step 1: Scrape the website via backend proxy (to avoid CORS)
