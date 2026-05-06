@@ -14,27 +14,50 @@ app.get("/api/health", (req, res) => {
 
 // API Route: Audit (Simulated)
 app.post("/api/audit", async (req, res) => {
-  const { url, industry } = req.body;
-  if (!url) return res.status(400).json({ error: "URL is required" });
-
   try {
+    const { url, industry } = req.body;
+    
+    // Validate request
+    if (!url) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "URL is required",
+        error: "Missing parameters" 
+      });
+    }
+
+    // Deep validation of URL format (basic check)
+    if (!url.includes(".") || url.length < 4) {
+       return res.status(400).json({ 
+        success: false, 
+        message: "Please provide a valid website URL",
+        error: "Invalid URL format" 
+      });
+    }
+
     // Artificial delay to simulate "processing"
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Extract domain for personalization
-    let domain = url.replace(/https?:\/\//, "").split("/")[0].replace("www.", "");
-    if (!domain) domain = url;
+    let domain = "your site";
+    try {
+      const cleanUrl = url.replace(/https?:\/\//, "").split("/")[0].replace("www.", "");
+      if (cleanUrl) domain = cleanUrl;
+    } catch (e) {
+      console.warn("Domain extraction failed for:", url);
+    }
+    
     const siteName = domain.split(".")[0].charAt(0).toUpperCase() + domain.split(".")[0].slice(1);
 
-    const industries: Record<string, string[]> = {
+    const industriesList: Record<string, string[]> = {
       "E-commerce": ["product pages", "checkout flow", "cart abandonment", "Social Proof", "Microcopy"],
       "SaaS": ["landing page", "onboarding flow", "pricing table", "Value Proposition", "Demo booking"],
       "Lead Gen": ["contact form", "value prop", "trust signals", "Lead magnet", "CTA visibility"],
       "General": ["homepage", "navigation", "footer", "Mobile responsiveness", "Readability"]
     };
 
-    const targetIndustry = (industry && industries[industry]) ? industry : "General";
-    const keywords = industries[targetIndustry] || industries["General"];
+    const targetIndustry = (industry && industriesList[industry]) ? industry : "General";
+    const keywords = industriesList[targetIndustry] || industriesList["General"];
 
     // Randomize score (45-85)
     const score = Math.floor(Math.random() * (85 - 45 + 1)) + 45;
@@ -129,8 +152,15 @@ app.post("/api/audit", async (req, res) => {
 
     // Shuffle and pick 5
     const selectedIssues = [...issuePool].sort(() => 0.5 - Math.random());
+    
+    // Safety check: ensure we have at least 2 issues for the bullets logic
+    if (selectedIssues.length < 2) {
+       selectedIssues.push(...issuePool.slice(0, 2));
+    }
 
     const result = {
+      success: true,
+      message: "Audit generated successfully",
       score,
       status,
       estimatedMonthlyRevenueLoss: monthlyLoss,
@@ -193,13 +223,16 @@ app.post("/api/audit", async (req, res) => {
 
     res.json(result);
   } catch (error: any) {
-    console.error("Audit Generation Error:", error.message);
+    console.error("CRITICAL: Audit Generation Error:", error);
     res.status(200).json({ 
-       // Return a fallback instead of 500 as requested
-       score: 65,
+       success: false,
+       message: "We encountered an issue generating your audit, but here is a sample assessment based on common patterns.",
+       error: error.message,
+       score: 58,
        status: "Needs Improvement",
-       estimatedMonthlyRevenueLoss: 5000,
-       topIssues: [] 
+       estimatedMonthlyRevenueLoss: 4200,
+       topIssues: [],
+       quickWins: ["Optimize mobile load speed", "Sharpen headline clarity"]
     });
   }
 });
