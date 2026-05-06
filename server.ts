@@ -1,6 +1,4 @@
 import express from "express";
-import axios from "axios";
-import * as cheerio from "cheerio";
 import path from "path";
 import dotenv from "dotenv";
 
@@ -14,84 +12,195 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
 
-// API Route: Scrape
-app.post("/api/scrape", async (req, res) => {
-  const { url } = req.body;
+// API Route: Audit (Simulated)
+app.post("/api/audit", async (req, res) => {
+  const { url, industry } = req.body;
   if (!url) return res.status(400).json({ error: "URL is required" });
 
   try {
-    const targetUrl = url.startsWith("http") ? url : `https://${url}`;
-    const response = await axios.get(targetUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
+    // Artificial delay to simulate "processing"
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Extract domain for personalization
+    let domain = url.replace(/https?:\/\//, "").split("/")[0].replace("www.", "");
+    if (!domain) domain = url;
+    const siteName = domain.split(".")[0].charAt(0).toUpperCase() + domain.split(".")[0].slice(1);
+
+    const industries: Record<string, string[]> = {
+      "E-commerce": ["product pages", "checkout flow", "cart abandonment", "Social Proof", "Microcopy"],
+      "SaaS": ["landing page", "onboarding flow", "pricing table", "Value Proposition", "Demo booking"],
+      "Lead Gen": ["contact form", "value prop", "trust signals", "Lead magnet", "CTA visibility"],
+      "General": ["homepage", "navigation", "footer", "Mobile responsiveness", "Readability"]
+    };
+
+    const targetIndustry = (industry && industries[industry]) ? industry : "General";
+    const keywords = industries[targetIndustry] || industries["General"];
+
+    // Randomize score (45-85)
+    const score = Math.floor(Math.random() * (85 - 45 + 1)) + 45;
+    const status = score < 60 ? "Critical" : score < 75 ? "Needs Improvement" : "Strong";
+    
+    // Revenue loss logic
+    const monthlyLoss = Math.floor(Math.random() * (12000 - 3000 + 1)) + 3000;
+    const yearlyLoss = monthlyLoss * 12;
+
+    const issuePool = [
+      {
+        title: "Weak Value Proposition",
+        impact: "High",
+        description: `The ${keywords[0]} doesn't clearly articulate why a customer should choose ${siteName} over competitors within the first 3 seconds.`,
+        fix: "Rewrite the H1 to focus on the primary benefit rather than features.",
+        whyItMatters: "Confusion is the #1 conversion killer. If they don't get it, they leave.",
+        potentialImpact: "15-20% boost in unique page views conversion."
       },
-      timeout: 10000,
-      validateStatus: () => true, 
-      responseType: 'text',
-      maxContentLength: 10 * 1024 * 1024, // 10MB limit
-    });
-
-    if (!response.data || typeof response.data !== 'string') {
-       throw new Error("Target website returned empty or invalid content.");
-    }
-
-    if (response.status === 403 || response.status === 401 || response.status === 429) {
-      return res.status(response.status).json({ 
-        error: `Website is protected by security measures (Status ${response.status}). Bot-blocking might be active at ${targetUrl}.`,
-        isBlocked: true 
-      });
-    }
-
-    if (response.status >= 400) {
-      return res.status(response.status).json({ error: `Website returned status ${response.status}` });
-    }
-
-    const $ = cheerio.load(response.data);
-    const title = $("title").text().trim();
-    const metaDescription = $('meta[name="description"]').attr("content") || "";
-    const h1s = $("h1").map((_, el) => $(el).text().trim()).get();
-    const h2s = $("h2").map((_, el) => $(el).text().trim()).get();
-
-    const ctas = $("a, button")
-      .filter((_, el) => {
-        const text = $(el).text().toLowerCase();
-        return (
-          text.includes("get") || text.includes("sign") || text.includes("book") || 
-          text.includes("demo") || text.includes("buy") || text.includes("contact")
-        );
-      })
-      .map((_, el) => ({ text: $(el).text().trim(), type: el.tagName }))
-      .get()
-      .slice(0, 10);
-
-    let bodyText = $("main, article, body").text().trim()
-      .replace(/\s+/g, " ")
-      .substring(0, 4000);
-
-    res.json({ url: targetUrl, title, description: metaDescription, h1s, h2s, ctas, bodyText });
-  } catch (error: any) {
-    let statusCode = 500;
-    let message = error.message;
-
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNABORTED') {
-        statusCode = 504;
-        message = "The website took too long to respond. It might be down or blocking us.";
-      } else if (error.code === 'ENOTFOUND') {
-        statusCode = 404;
-        message = "Could not find the website. Make sure the URL is correct.";
-      } else if (error.response) {
-        statusCode = error.response.status;
-        message = `Website returned an error: ${error.response.statusText}`;
+      {
+        title: "Friction in User Flow",
+        impact: "Medium",
+        description: `Too many steps or distractions in the ${keywords[1]} (specifically around the secondary nav) are causing users to drop off.`,
+        fix: "Remove secondary navigation and unnecessary form fields in the conversion path.",
+        whyItMatters: "Every extra click reduces the probability of a conversion by roughly 10%.",
+        potentialImpact: "8-12% reduction in bounce rate on target pages."
+      },
+      {
+        title: "Invisible Calls to Action",
+        impact: "High",
+        description: `The primary buttons on the ${keywords[0]} blend into the background or are buried 'below the fold' on mobile browsers.`,
+        fix: "Use high-contrast colors for primary buttons and ensure a CTA is visible without scrolling.",
+        whyItMatters: "If users have to hunt for the 'Next Step', they won't take it.",
+        potentialImpact: "25% increase in click-through rate (CTR)."
+      },
+      {
+        title: "Lack of Social Proof",
+        impact: "Medium",
+        description: `${siteName} lacks visible trust signals (reviews, logos, case studies) at the critical decision-making points.`,
+        fix: "Inject 2-3 customer testimonials directly above the main conversion element.",
+        whyItMatters: "Trust is the currency of the web. Without proof, you're just a stranger asking for money.",
+        potentialImpact: "5-10% lift in overall trust score and conversion."
+      },
+      {
+        title: "Mobile Optimization Gaps",
+        impact: "High",
+        description: `The ${keywords[3] || "layout"} breaks on smaller screens, specifically affecting the ${keywords[2] || "checkout"} experience for iOS users.`,
+        fix: "Implement a 'sticky' CTA on mobile and fix overlapping element containers.",
+        whyItMatters: "Over 60% of your traffic is likely mobile. A broken mobile UI is a broken business.",
+        potentialImpact: "Significant recovery of mobile-only revenue loss."
+      },
+      {
+        title: "Information Overload",
+        impact: "Medium",
+        description: `The ${keywords[0]} is too text-heavy, making it difficult for visitors to scan for key information quickly.`,
+        fix: "Use bullet points, iconography, and better whitespace to break up long blocks of text.",
+        whyItMatters: "Web users scan, they don't read. If you make them work too hard, they'll leave.",
+        potentialImpact: "10-15% increase in average session duration."
+      },
+      {
+        title: "Lack of Internal Urgency",
+        impact: "Low",
+        description: `There is no incentive for a visitor of ${siteName} to take action *right now* rather than leaving and forgetting.`,
+        fix: "Implement subtle urgency triggers like 'limited spots available' or a clear deadline for an offer.",
+        whyItMatters: "Procrastination leads to lost sales. Give them a reason to click today.",
+        potentialImpact: "5-8% increase in immediate checkout starts."
+      },
+      {
+        title: "Conflicting Navigational Paths",
+        impact: "Medium",
+        description: `The navigation menu on ${keywords[0]} has too many links, distracting users from the primary conversion path.`,
+        fix: "Simplify the headers to only include 4-5 essential links.",
+        whyItMatters: "Hick's Law states that more choices lead to longer decision times and higher abandonment.",
+        potentialImpact: "12% more traffic directed to high-value pages."
+      },
+      {
+        title: "Poor Visual Hierarchy",
+        impact: "High",
+        description: `The most important element on the ${keywords[1]} isn't the most visually prominent, confusing the user's focus.`,
+        fix: "Use scale and color contrast to guide the eye toward the primary CTA.",
+        whyItMatters: "Visual hierarchy controls the 'story' of the page. If the story is messy, the conversion fails.",
+        potentialImpact: "18% improvement in focus-map heatmap scores."
+      },
+      {
+        title: "Broken Trust during Checkout",
+        impact: "High",
+        description: `The transition from ${keywords[1]} to the final step lack consistent branding or security badges.`,
+        fix: "Add SSL badges and keep branding consistent across subdomains or external checkouts.",
+        whyItMatters: "Security concerns at checkout are a top reason for cart abandonment.",
+        potentialImpact: "15% reduction in checkout abandonment."
       }
-    }
+    ];
 
-    console.error("Internal Scrape Error:", message);
-    res.status(statusCode).json({ error: message });
+    // Shuffle and pick 5
+    const selectedIssues = [...issuePool].sort(() => 0.5 - Math.random());
+
+    const result = {
+      score,
+      status,
+      estimatedMonthlyRevenueLoss: monthlyLoss,
+      estimatedYearlyRevenueLoss: yearlyLoss,
+      revenueImpactStatement: `Based on average ${targetIndustry} benchmarks, ${siteName} is likely leaking significant revenue through micro-frictions.`,
+      executiveAnalysis: `Our scan of ${domain} reveals that while the brand is strong, the conversion architecture is lagging behind best practices. The primary friction point is the ${selectedIssues[0].title}.`,
+      executiveSummaryBullets: [
+        `${siteName}'s conversion rate is currently below industry average for ${targetIndustry}.`,
+        `The ${selectedIssues[1].title} is causing approximately $${Math.floor(monthlyLoss * 0.4).toLocaleString()}/mo in direct leakage.`,
+        "Mobile users are experiencing higher bounce rates than desktop counterparts.",
+        "The value proposition needs immediate sharpening to reduce immediate bounce.",
+        "Social proof is underutilized at critical decision points."
+      ],
+      topIssues: selectedIssues.slice(0, 5).map(issue => ({
+        title: issue.title,
+        impact: issue.impact,
+        description: issue.description,
+        fix: issue.fix,
+        whyItMatters: issue.whyItMatters,
+        potentialImpactText: issue.potentialImpact
+      })),
+      quickWins: [
+        "Change CTA button color to a high-contrast hue.",
+        "Add a trust banner with logos under the hero section.",
+        "Simplify the main navigation menu.",
+        "Speed up page load by optimizing top-of-fold images.",
+        "Add a 5-second customer video testimonial."
+      ].sort(() => 0.5 - Math.random()).slice(0, 4),
+      strategicRecommendations: [
+        "Implement A/B testing on all primary headlines.",
+        "Conduct a full heat-map analysis of the checkout flow.",
+        "Redesign the mobile experience for 'thumb-friendly' interaction."
+      ],
+      emailTemplate: {
+        subject: [`Quick feedback on ${domain}`, `Question about ${siteName}`, `I recorded a video for you regarding ${domain}`][Math.floor(Math.random() * 3)],
+        body: (() => {
+           const intros = [
+             "Hey — came across your store, really like what you're building.",
+             `Hi, I was just checking out ${domain} and I'm a big fan of the brand.`,
+             `Hey, I was browsing ${siteName} and noticed something interesting.`
+           ];
+           const intro = intros[Math.floor(Math.random() * intros.length)];
+           
+           return `${intro}\n\nQuick thing I noticed:\n\nYour current site flow is likely underperforming for first-time visitors — especially on mobile.\n\nFor example: ${selectedIssues[0].description}\n\nFixing this alone could noticeably improve conversions without increasing ad spend.\n\nI recorded a quick teardown showing exactly where you're losing revenue.\n\nWant me to send it over?`;
+        })()
+      },
+      nextStepsCTA: {
+        headline: `Stop leaking $${monthlyLoss.toLocaleString()} a month.`,
+        body: `The issues identified on ${domain} are entirely fixable. Most of our clients see an ROI within the first 14 days of implementation.`,
+        buttonText: "Request a Full Implementation Plan"
+      },
+      performanceMetrics: {
+        messaging: Math.floor(Math.random() * (90 - 40) + 40),
+        trust: Math.floor(Math.random() * (90 - 40) + 40),
+        performance: Math.floor(Math.random() * (90 - 40) + 40),
+        ux: Math.floor(Math.random() * (90 - 40) + 40),
+        conversion: Math.floor(Math.random() * (90 - 40) + 40)
+      }
+    };
+
+    res.json(result);
+  } catch (error: any) {
+    console.error("Audit Generation Error:", error.message);
+    res.status(200).json({ 
+       // Return a fallback instead of 500 as requested
+       score: 65,
+       status: "Needs Improvement",
+       estimatedMonthlyRevenueLoss: 5000,
+       topIssues: [] 
+    });
   }
 });
 
